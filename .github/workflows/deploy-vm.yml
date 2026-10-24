@@ -1,0 +1,29 @@
+name: deploy-vm
+
+# Deploys the VM stack (compose) over SSH. Enable after the OCI VM exists (Week 1).
+# Required repo secrets: VM_HOST, VM_USER (default ubuntu), SSH_PRIVATE_KEY
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "vm/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy compose stack
+        run: |
+          rsync -az -e "ssh -i ~/.ssh/id_ed25519" vm/ "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:~/vibezone-vm/"
+          ssh -i ~/.ssh/id_ed25519 "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}" \
+            'cd ~/vibezone-vm && docker compose up -d --build --remove-orphans'

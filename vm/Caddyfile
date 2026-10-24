@@ -1,0 +1,12 @@
+# Caddy vhosts for the VM (D5/D8 — free TLS via Let's Encrypt on sslip.io)
+# Phase 2 (Week 3) will add:  realtime vhost → Socket.IO gateway
+{$CADDY_DOMAIN} {
+	encode gzip
+
+	handle /send* {
+		reverse_proxy mailer:3001
+	}
+	handle {
+		respond "VibeZone VM services" 200
+	}
+}
