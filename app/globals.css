@@ -43,3 +43,137 @@ body {
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
 }
+
+/* ============================================================
+   VibeZone dashboard — image-matched dark UI (scoped to .vz-dash)
+   ============================================================ */
+.vz-dash {
+  --vz-bg: #07070c;
+  --vz-bg-soft: #0a0a11;
+  --vz-card: #121219;
+  --vz-card-2: #171720;
+  --vz-card-3: #1d1d28;
+  --vz-border: #23232f;
+  --vz-border-soft: #1a1a23;
+  --vz-text: #f4f4f7;
+  --vz-muted: #8b8b9c;
+  --vz-muted-2: #62627a;
+  --vz-violet: #7c5cff;
+  --vz-violet-2: #a78bfa;
+  --vz-magenta: #d946ef;
+  --vz-green: #4ade80;
+  --vz-amber: #fbbf24;
+  --vz-red: #f87171;
+  --vz-cyan: #22d3ee;
+
+  background: var(--vz-bg);
+  color: var(--vz-text);
+  color-scheme: dark;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Optional light appearance for the dashboard (default is the dark reference). */
+.vz-dash.vz-light {
+  --vz-bg: #f7f6fb;
+  --vz-bg-soft: #ffffff;
+  --vz-card: #ffffff;
+  --vz-card-2: #f5f4fa;
+  --vz-card-3: #eceaf5;
+  --vz-border: #e4e2ee;
+  --vz-border-soft: #efedf6;
+  --vz-text: #17151f;
+  --vz-muted: #5f5b75;
+  --vz-muted-2: #8d89a4;
+  --vz-violet: #6d4aff;
+  --vz-violet-2: #6d4aff;
+  --vz-magenta: #c026d3;
+  --vz-green: #16a34a;
+  --vz-amber: #d97706;
+  --vz-red: #dc2626;
+  --vz-cyan: #0891b2;
+
+  color-scheme: light;
+}
+.vz-dash.vz-light .vz-map {
+  background-image: radial-gradient(rgba(23, 21, 31, 0.07) 1px, transparent 1px);
+}
+.vz-dash.vz-light .vz-scroll::-webkit-scrollbar-thumb {
+  background: #d8d5e6;
+}
+
+.vz-dash ::selection {
+  background: rgba(124, 92, 255, 0.35);
+  color: #fff;
+}
+
+/* Cards & surfaces */
+.vz-panel {
+  background: var(--vz-card);
+  border: 1px solid var(--vz-border);
+  border-radius: 1rem;
+}
+.vz-panel-2 {
+  background: var(--vz-card-2);
+  border: 1px solid var(--vz-border-soft);
+  border-radius: 0.875rem;
+}
+.vz-panel-3 {
+  background: var(--vz-card-3);
+  border: 1px solid var(--vz-border);
+  border-radius: 0.75rem;
+}
+.vz-hairline {
+  border-color: var(--vz-border);
+}
+.vz-muted {
+  color: var(--vz-muted);
+}
+.vz-muted-2 {
+  color: var(--vz-muted-2);
+}
+
+/* Hero gradient */
+.vz-hero {
+  background:
+    radial-gradient(120% 150% at 0% 0%, rgba(124, 92, 255, 0.55) 0%, rgba(124, 92, 255, 0) 55%),
+    linear-gradient(120deg, #5b21b6 0%, #6d28d9 30%, #7c3aed 55%, #a21caf 82%, #d946ef 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 60px -30px rgba(124, 58, 237, 0.8);
+}
+.vz-hero-glow {
+  background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.22), transparent 55%);
+}
+
+/* Text gradient */
+.vz-gradient-text {
+  background: linear-gradient(90deg, #c4b5fd, #f0abfc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Subtle scrollbar */
+.vz-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.vz-scroll::-webkit-scrollbar-thumb {
+  background: #2a2a38;
+  border-radius: 999px;
+}
+.vz-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Map dotted grid */
+.vz-map {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Hide scrollbar for tab strips */
+.vz-no-scrollbar {
+  scrollbar-width: none;
+}
+.vz-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

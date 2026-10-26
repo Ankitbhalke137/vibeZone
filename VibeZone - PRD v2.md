@@ -4,6 +4,15 @@
 **Supersedes:** `VibeZone - Finalized Product Requirements Document (PRD) & Database Schema.md` (v1 draft)
 **Companion document:** `VibeZone - 8-Week Delivery Plan.md`
 
+> **Plan update (25 Oct 2026) — D12: Database = Neon Postgres (free tier).**
+> The database is no longer the VM's Postgres container. The app uses Neon's
+> **pooled** URL (`DATABASE_URL`) and **direct** URL (`DIRECT_URL`, for Prisma
+> schema operations). The OCI VM now runs only the mailer, Socket.IO realtime
+> gateway and scheduler. Wherever D1/D7/§9/§10 below mention "Postgres on the
+> OCI VM", read **Neon Postgres**. Setup: `docs/NEON.md`. Everything else in
+> this PRD is unchanged.
+
+
 ---
 
 ## 0. Decision Log (locked)
@@ -21,6 +30,8 @@
 | D9 | Feedback routing | **Admin dashboard only** — no formal faculty channel; copy says "goes to the VibeZone admin team" | Confirmed by super admin |
 | D10 | Roles | **Super admin (founder) is the only initial `admin`**; grants/revokes `moderator` from the dashboard; alias de-anonymization requires a role granted by the super admin | Confirmed by super admin |
 | D11 | Campus email & URL | OTP allow-list = **`@pwioi.com`** (`CAMPUS_EMAIL_DOMAINS=pwioi.com`); app stays on **`vibezone.vercel.app`** + `<ip>.sslip.io` | pwioi.com exists but its DNS is not editable by us → free URLs confirmed (D5/D9); revisit a custom domain only if DNS access is granted later |
+| D11 | Campus email & URL | OTP allow-list = **`@pwioi.com`** (`CAMPUS_EMAIL_DOMAINS=pwioi.com`); app stays on **`vibezone.vercel.app`** + `<ip>.sslip.io` | pwioi.com exists but its DNS is not editable by us → free URLs confirmed (D5/D9); revisit a custom domain only if DNS access is granted later |
+| D12 | Database (supersedes D1/D7) | **Neon Postgres free tier** — pooled `DATABASE_URL` for the app, direct `DIRECT_URL` for Prisma; TLS enforced by Neon. VM keeps mailer/realtime/scheduler only | Managed backups/patching, no public Postgres port, serverless-friendly pooling; stays $0 |
 
 ---
 

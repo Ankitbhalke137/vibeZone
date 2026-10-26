@@ -1,77 +1,85 @@
 # VibeZone — Ops Runbook
 
 > Solo bus-factor protection (plan §5). Keep this current — the future-you at 2 a.m. is the audience.
-> Status: **Phase 1** — sections marked _(Week N)_ get filled as phases ship.
+> Status: **Phase 2** — database is Neon (D12); the VM runs mailer, realtime, scheduler, Caddy.
 
-## 1. Architecture (Phase 1)
+## 1. Architecture
 
 ```
 Vercel (bom1)  ── https ──▶  browser
      │
-     ├── Postgres : TLS, port 15432 ──▶ OCI VM (ap-mumbai-1) · Docker: postgres + mailer + caddy
-     └── POST /send + secret ────────▶ Caddy (https://<VM_IP>.sslip.io) → mailer → Gmail SMTP :587
+     ├── Neon Postgres (pooled + direct URLs, TLS) ──▶ managed database
+     ├── POST /send + secret ────────▶ Caddy (https://<VM_IP>.sslip.io) → mailer → Gmail SMTP :587
+     └── POST /publish + secret ─────▶ Caddy → Socket.IO gateway (WSS /socket.io)
+                                        scheduler (IST cron) ──▶ Neon + mailer + Web Push
 ```
 
-VM ports open in the OCI security list: **22** (key-only), **80/443** (Caddy), **15432** (Postgres, TLS-only via pg_hba).
+VM ports open in the OCI security list: **22** (key-only), **80/443** (Caddy).
+No database port is exposed anywhere.
 
 ## 2. Everyday commands
 
 | Task | Command |
 |---|---|
 | App — local | `npm run dev` |
-| DB create/update | `npm run db:push` |
+| DB create/update (Neon) | `npm run db:push` |
 | DB constraints | `npm run db:harden` |
 | DB seed | `npm run db:seed` |
 | VM services up | `cd vm && docker compose up -d --build` |
 | VM logs | `docker compose logs -f --tail=100` |
 | App deploy | push to `main` → Vercel auto-deploys |
-| VM deploy _(Week 3)_ | GitHub Action `deploy-vm.yml` (manual `workflow_dispatch` first) |
+| VM deploy | GitHub Action `deploy-vm.yml` (manual `workflow_dispatch` first) |
 
-## 3. Backup & restore (NFR-010)
+## 3. Neon database
 
-- **Automatic:** nightly `pg_dump` → Object Storage, 30-day lifecycle (cron job — _(Week 1 setup below)_).
-- **Manual dump:** `docker compose exec postgres pg_dump -U vibezone -Fc vibezone > vibezone-$(date +%F).dump`
-- **Restore drill (required before launch):** copy a dump locally →
-  `docker compose exec -T postgres pg_restore -U vibezone -d vibezone --clean --if-exists < dump`
-  → verify row counts (`select count(*) from users;` etc). Record date + counts below.
+Setup and connection strings: [`NEON.md`](./NEON.md).
+
+| Task | Command |
+|---|---|
+| Schema push | `npm run db:push` (uses `DIRECT_URL`) |
+| Constraints | `npm run db:harden` |
+| Seed | `npm run db:seed` |
+| Manual dump | `pg_dump "$DIRECT_URL" -Fc -f vibezone-$(date +%F).dump` |
+| Restore | `pg_restore --clean --if-exists -d "$DIRECT_URL" dump` |
+| Check connections | `psql "$DIRECT_URL" -c "select count(*) from pg_stat_activity;"` |
+
+**Backup & restore (NFR-010):** nightly dump → OCI Object Storage, 30-day retention
++ 8 weekly dumps. Record drills here:
 
 | Drill date | users | messages | notes | Restored by |
 |---|---|---|---|---|
 | _pending_ | | | | |
-
-### Nightly backup job (add to VM crontab)
-
-```sh
-# crontab -e  (runs 03:15 IST daily)
-15 3 * * * docker exec vibezone-postgres pg_dump -U vibezone -Fc vibezone > /opt/backups/vibezone-$(date +\%F).dump && \
-  /usr/bin/env bash -c 'command -v oci >/dev/null && echo skip || true' # upload step: see §6
-```
-_(Simpler upload: install `oci` CLI or `rclone` against the Object Storage bucket — Week 1 task.)_
 
 ## 4. Incidents
 
 | Symptom | First moves |
 |---|---|
 | App down on Vercel | Check Sentry → redeploy previous good commit (Vercel → Deployments → … → Promote) |
-| DB unreachable | `cd vm && docker compose ps && docker compose logs postgres --tail=200` → restart: `docker compose restart postgres` |
-| VM reclaimed by Oracle | Recreate A1 instance (same shape ≤ 2 OCPU/12 GB), re-run `docker compose up -d`, restore latest dump, update Vercel `DATABASE_URL` if IP changed |
-| OTP emails not arriving | `docker compose logs mailer` → test: `curl -sS -X POST https://<domain>/send -H 'x-mailer-secret: …' -H 'content-type: application/json' -d '{"to":"you@pwioi.com","subject":"test","text":"test"}'` → check Gmail "less secure"/lockout → rotate App Password (Q2) |
-| Chat gateway down _(Week 3)_ | `docker compose restart realtime` |
+| DB unreachable | Neon dashboard → project status/usage; check Vercel `DATABASE_URL`; Neon autosuspends after ~5 min idle (first query is slower) |
+| DB connection limit | Use the **pooled** `DATABASE_URL` on Vercel and in `vm/.env`; direct URL only for schema operations |
+| OTP emails not arriving | `docker compose logs mailer` → test: `curl -sS -X POST https://<domain>/send -H 'x-mailer-secret: …' -H 'content-type: application/json' -d '{"to":"you@pwioi.com","subject":"test","text":"test"}'` → check Gmail lockout → rotate App Password (Q2) |
+| Chat gateway down | `docker compose restart realtime`; check `curl https://<domain>/health` |
+| Scheduler stopped | `docker compose logs scheduler --tail=200`; reminders/polls will catch up on the next tick |
+| VM reclaimed by Oracle | Recreate A1 instance (same shape ≤ 2 OCPU/12 GB), re-run `docker compose up -d`, update `CADDY_DOMAIN` if IP changed. Neon is unaffected. |
 
 ## 5. Security chores
 
-- **Weekly:** `docker compose exec postgres psql -U vibezone -d vibezone -c "select usename, application_name, state from pg_stat_activity;"`
-- **Monthly:** review `audit_logs` (esp. `reveal_alias`), check Uptime Kuma, `npm audit`
-- **Rotate before launch + quarterly:** DB password, `SESSION_SECRET`, `MAILER_SECRET`, Gmail App Password (Q2 — it was exposed in chat)
-- **DB password rotation:** `ALTER ROLE vibezone PASSWORD '…';` then update Vercel `DATABASE_URL` + `vm/.env`, `docker compose up -d postgres`
+- **Weekly:** review Neon usage, `docker compose ps`, Uptime Kuma, `npm audit`.
+- **Monthly:** review `audit_logs` (esp. `reveal_alias`), rotate `REALTIME_SECRET`/`MAILER_SECRET`, check Vercel/Neon limits.
+- **Rotate before launch + quarterly:** Neon DB password, `SESSION_SECRET`, `MAILER_SECRET`, `REALTIME_SECRET`, Gmail App Password (Q2 — it was exposed in chat).
+- **Neon password rotation:** Neon Console → Roles → reset password → update Vercel `DATABASE_URL`/`DIRECT_URL` and `vm/.env` → redeploy + `docker compose up -d`.
 
 ## 6. Environment inventory
 
 | Secret | Lives in | Set? |
 |---|---|---|
-| `SESSION_SECRET` | Vercel + `.env.local` | ☐ |
-| `DATABASE_URL` (incl. DB password) | Vercel + `.env.local` | ☐ |
+| `DATABASE_URL` (Neon pooled) | Vercel + `vm/.env` + `.env.local` | ☐ |
+| `DIRECT_URL` (Neon direct) | Vercel + `.env.local` | ☐ |
+| `SESSION_SECRET` | Vercel + `vm/.env` + `.env.local` | ☐ |
 | `MAILER_SECRET` | Vercel + `vm/.env` | ☐ |
+| `REALTIME_SECRET` | Vercel + `vm/.env` | ☐ |
+| `VAPID_PUBLIC_KEY` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Vercel + `vm/.env` | ☐ |
+| `VAPID_PRIVATE_KEY` | Vercel + `vm/.env` | ☐ |
 | `SMTP_APP_PASSWORD` | **only** `vm/.env` | ☐ (rotate!) |
 | `CAMPUS_EMAIL_DOMAINS` | `pwioi.com` (not secret) | ☐ |
 | `SUPER_ADMIN_EMAILS` | your email (not secret) | ☐ |

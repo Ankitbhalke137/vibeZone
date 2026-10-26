@@ -1,0 +1,11 @@
+{
+  "name": "vibezone-realtime",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "dependencies": {
+    "jose": "^5.9.6",
+    "pg": "^8.13.1",
+    "socket.io": "^4.8.1"
+  }
+}

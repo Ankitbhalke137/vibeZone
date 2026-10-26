@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     );
   }
 
-  await setSessionCookie({ sub: user.id, role: user.role });
+  await setSessionCookie({ sub: user.id, role: user.role, sv: user.sessionVersion });
   return NextResponse.json({
     ok: true,
     onboarded: !!user.onboardedAt,

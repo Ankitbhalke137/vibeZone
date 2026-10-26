@@ -9,8 +9,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon: pooled URL for the app, direct URL for `prisma db push` / migrations.
+  directUrl = env("DIRECT_URL")
 }
 
 // ============ Identity ============
@@ -28,6 +30,7 @@ model User {
   status       String    @default("active") @db.VarChar(12) // active|banned|deleted
   expertise    Json? // senior tags: ["DSA","Placements"]
   onboardedAt DateTime? @map("onboarded_at")
+  sessionVersion Int    @default(0) @map("session_version") // bumped by "sign out everywhere" (FR-AUTH-004)
   lastSeenAt   DateTime? @map("last_seen_at")
   createdAt    DateTime  @default(now()) @map("created_at")
 
@@ -54,6 +57,10 @@ model User {
   pushSubscriptions PushSubscription[]
   blockedHappenedTo BlockedUser[] @relation("BlockBlocked")
   blockedByThem   BlockedUser[]   @relation("BlockBlocker")
+  warningsReceived UserWarning[] @relation("WarningTarget")
+  warningsIssued   UserWarning[] @relation("WarningIssuer")
+  contentReportsFiled   ContentReport[] @relation("ContentReporter")
+  contentReportsHandled ContentReport[] @relation("ContentReportHandler")
   auditLogs     AuditLog[]
 
   @@index([role])
@@ -156,6 +163,10 @@ model Announcement {
   imageUrl  String?   @map("image_url")
   pinned    Boolean   @default(false)
   notify    Boolean   @default(false)
+  viewCount Int      @default(0) @map("view_count")
+  clickCount Int     @default(0) @map("click_count")
+  notifiedAt DateTime? @map("notified_at")
+  archivedAt DateTime? @map("archived_at")
   publishAt DateTime  @default(now()) @map("publish_at")
   expiresAt DateTime? @map("expires_at")
   authorId  String    @map("author_id") @db.Uuid
@@ -181,6 +192,7 @@ model Event {
   coverImageUrl     String?   @map("cover_image_url")
   externalStreamUrl String?   @map("external_stream_url") // v1 stand-in for live video (D2)
   status            String    @default("published") @db.VarChar(12) // draft|published|cancelled
+  rsvpClosedAt      DateTime? @map("rsvp_closed_at")
   createdBy         String    @map("created_by") @db.Uuid
   createdAt         DateTime  @default(now()) @map("created_at")
 
@@ -197,6 +209,8 @@ model EventRsvp {
   status     String    @default("going") @db.VarChar(10) // going|maybe|not_going
   createdAt  DateTime  @default(now()) @map("created_at")
   remindedAt DateTime? @map("reminded_at")
+  reminded24At DateTime? @map("reminded_24_at")
+  reminded1At  DateTime? @map("reminded_1_at")
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -220,6 +234,7 @@ model Note {
   fileUrl      String?  @map("file_url") // v1.5 direct upload
   uploadedBy   String   @map("uploaded_by") @db.Uuid
   openCount    Int      @default(0) @map("open_count")
+  removedAt    DateTime? @map("removed_at")
   createdAt    DateTime @default(now()) @map("created_at")
 
   uploader User       @relation(fields: [uploadedBy], references: [id])
@@ -250,6 +265,7 @@ model Poll {
   status    String    @default("draft") @db.VarChar(12) // draft|scheduled|open|closed
   opensAt   DateTime? @map("opens_at")
   closesAt  DateTime? @map("closes_at")
+  notifiedAt DateTime? @map("notified_at")
   createdBy String?   @map("created_by") @db.Uuid
   createdAt DateTime  @default(now()) @map("created_at")
 
@@ -353,6 +369,7 @@ model LostAndFound {
   imageUrl    String?   @map("image_url")
   status      String    @default("open") @db.VarChar(10) // open|resolved
   userId      String    @map("user_id") @db.Uuid
+  removedAt   DateTime? @map("removed_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   resolvedAt  DateTime? @map("resolved_at")
 
@@ -405,6 +422,7 @@ model NotificationPref {
   category     String   @db.VarChar(24)
   pushEnabled  Boolean  @default(true) @map("push_enabled")
   inappEnabled Boolean  @default(true) @map("inapp_enabled")
+  emailEnabled Boolean  @default(false) @map("email_enabled")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -426,6 +444,44 @@ model PushSubscription {
 }
 
 // ============ Safety ============
+
+// Strike system (FR-MOD-005). Three active warnings → automatic soft-ban.
+model UserWarning {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  issuedBy  String   @map("issued_by") @db.Uuid
+  reason    String   @db.VarChar(300)
+  reportId  String?  @map("report_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User @relation("WarningTarget", fields: [userId], references: [id], onDelete: Cascade)
+  issuer User @relation("WarningIssuer", fields: [issuedBy], references: [id])
+
+  @@index([userId, createdAt])
+  @@map("user_warnings")
+}
+
+// Reports for content other than chat messages (notes, lost & found, announcements).
+// Chat reports use message_reports + contextual snapshot (FR-CHAT-008/FR-MOD-002).
+model ContentReport {
+  id          String    @id @default(uuid()) @db.Uuid
+  contentType String    @map("content_type") @db.VarChar(16) // note|lost_found|announcement
+  contentId   String    @map("content_id") @db.Uuid
+  reporterId  String?   @map("reporter_id") @db.Uuid
+  reason      String    @db.VarChar(20) // abuse|spam|explicit|other|broken_link
+  detail      String?   @db.VarChar(500)
+  status      String    @default("open") @db.VarChar(12) // open|dismissed|actioned
+  handledBy   String?   @map("handled_by") @db.Uuid
+  handledAt   DateTime? @map("handled_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  reporter User? @relation("ContentReporter", fields: [reporterId], references: [id])
+  handler  User? @relation("ContentReportHandler", fields: [handledBy], references: [id])
+
+  @@unique([contentType, contentId, reporterId])
+  @@index([status, createdAt])
+  @@map("content_reports")
+}
 
 model BlockedUser {
   blockerId String   @map("blocker_id") @db.Uuid

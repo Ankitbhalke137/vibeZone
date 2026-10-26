@@ -1,49 +1,10 @@
-# VibeZone VM stack — OCI Always Free (D1/D5/D7/D8)
-# Run on the VM:   cp .env .env.example edited  &&  docker compose up -d
-# Services: Postgres 16 (public, TLS+SCRAM, custom port) · Mailer (Gmail SMTP) · Caddy (HTTPS)
-# Scheduled for later phases (Weeks 3–4): realtime gateway, scheduler.
+# VibeZone VM stack — OCI Always Free (D5/D8/D12)
+# Database is Neon (managed Postgres); the VM only runs mail, realtime, schedulers.
+# Run on the VM:   cp .env.example .env  &&  edit secrets  &&  docker compose up -d --build
 
 name: vibezone
 
 services:
-  postgres:
-    image: postgres:16
-    restart: unless-stopped
-    entrypoint: ["/bin/sh", "/docker-entrypoint-wrapper.sh"]
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-vibezone}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in vm/.env}
-      POSTGRES_DB: ${POSTGRES_DB:-vibezone}
-    command:
-      - postgres
-      - -c
-      - listen_addresses=*
-      - -c
-      - password_encryption=scram-sha-256
-      - -c
-      - max_connections=${PG_MAX_CONN:-40}
-      - -c
-      - ssl=on
-      - -c
-      - ssl_cert_file=/etc/postgresql/certs/server.crt
-      - -c
-      - ssl_key_file=/etc/postgresql/certs/server.key
-      - -c
-      - ssl_min_protocol_version=TLSv1.2
-      - -c
-      - hba_file=/etc/postgresql/pg_hba.conf
-    ports:
-      - "${POSTGRES_PORT:-15432}:5432" # D7: non-standard public port
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ./postgres/wrapper.sh:/docker-entrypoint-wrapper.sh:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vibezone} -d ${POSTGRES_DB:-vibezone}"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-
   mailer:
     build: ./mailer
     restart: unless-stopped
@@ -52,18 +13,47 @@ services:
       SMTP_APP_PASSWORD: ${SMTP_APP_PASSWORD:?set SMTP_APP_PASSWORD — the 16-char App Password}
       MAILER_SECRET: ${MAILER_SECRET:?set MAILER_SECRET — shared with the Vercel app}
       SMTP_PORT: "587"
-    # not published — only reachable through Caddy (TLS)
+    # not published — only reachable through Caddy (TLS) / the scheduler network
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
 
+  realtime:
+    build: ./realtime
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL (Neon pooled URL)}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET — same as Vercel}
+      REALTIME_SECRET: ${REALTIME_SECRET:?set REALTIME_SECRET — same as Vercel}
+      APP_ORIGIN: ${APP_ORIGIN:-}
+      PORT: "3002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  scheduler:
+    build: ./scheduler
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL (Neon pooled URL)}
+      APP_URL: ${APP_URL:-https://vibezone.vercel.app}
+      MAILER_URL: http://mailer:3001/send
+      MAILER_SECRET: ${MAILER_SECRET:?set MAILER_SECRET}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:vibezoneioi25@gmail.com}
+    depends_on:
+      mailer:
+        condition: service_started
+
   caddy:
     image: caddy:2
     restart: unless-stopped
     environment:
-      # e.g. 129.153.x.x.sslip.io  (free DNS → this VM; set after the VM gets its IP)
       CADDY_DOMAIN: ${CADDY_DOMAIN:?set CADDY_DOMAIN — e.g. <VM_IP>.sslip.io}
     ports:
       - "80:80"
@@ -74,8 +64,8 @@ services:
       - caddy_config:/config
     depends_on:
       - mailer
+      - realtime
 
 volumes:
-  pgdata:
   caddy_data:
   caddy_config:

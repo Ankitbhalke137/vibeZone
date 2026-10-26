@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, FormError, Input, Label } from "@/components/ui/form";
+import { Avatar } from "@/components/avatar";
+import { AVATAR_PRESETS } from "@/lib/avatars";
 
 const BRANCHES = ["CSE", "IT", "ECE", "EEE", "ME", "CE", "Other"];
 
@@ -13,6 +15,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState("");
   const [branch, setBranch] = useState<string>("CSE");
   const [year, setYear] = useState<number>(1);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -35,7 +38,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/me", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ handle, name, branch, year, completeOnboarding: true }),
+        body: JSON.stringify({ handle, name, branch, year, avatarUrl, completeOnboarding: true }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Couldn't save.");
@@ -54,6 +57,34 @@ export default function OnboardingPage() {
 
       <Card>
         <form onSubmit={save} className="flex flex-col gap-4">
+          <div>
+            <Label>Avatar</Label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                aria-label="Initials avatar"
+                onClick={() => setAvatarUrl("")}
+                className={`rounded-full p-0.5 ring-2 transition ${avatarUrl === "" ? "ring-primary" : "ring-transparent"}`}
+              >
+                <Avatar name={name} handle={handle} avatarUrl={null} size="md" />
+              </button>
+              {AVATAR_PRESETS.map((p) => {
+                const url = `preset:${p.key}`;
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    aria-label={`Avatar preset ${p.key}`}
+                    onClick={() => setAvatarUrl(url)}
+                    className={`rounded-full p-0.5 ring-2 transition ${avatarUrl === url ? "ring-primary" : "ring-transparent"}`}
+                  >
+                    <Avatar name={name} handle={handle} avatarUrl={url} size="md" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="name">Display name</Label>
             <Input id="name" required minLength={2} value={name} onChange={(e) => setName(e.target.value)} />

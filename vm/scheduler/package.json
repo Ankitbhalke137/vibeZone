@@ -1,0 +1,11 @@
+{
+  "name": "vibezone-scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "pg": "^8.13.1",
+    "web-push": "^3.6.7"
+  }
+}

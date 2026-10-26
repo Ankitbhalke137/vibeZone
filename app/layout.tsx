@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ShellNav } from "@/components/shell-nav";
+import { AppShell } from "@/components/app-shell";
+import { gaInitSnippet } from "@/lib/ga";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+// GA4 base (Week 2) — renders nothing when unset (local/preview)
+const GA_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
 
 export const metadata: Metadata = {
   title: {
@@ -14,12 +19,16 @@ export const metadata: Metadata = {
   description:
     "Announcements, chat, events, notes, polls and more for the PW IOI campus. One moderated, gamified, mobile-friendly web app.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b1120" },
+    { media: "(prefers-color-scheme: dark)", color: "#07070c" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -30,14 +39,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
         <ThemeProvider>
-          <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col">
-            <ShellNav />
-            <main className="flex-1 px-4 pb-24 pt-4">{children}</main>
-            <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted">
-              VibeZone · built for the campus · $0 infrastructure
-            </footer>
-          </div>
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
+        {GA_ID ? (
+          <>
+            <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+            <Script id="ga4-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: gaInitSnippet(GA_ID) }} />
+          </>
+        ) : null}
       </body>
     </html>
   );
