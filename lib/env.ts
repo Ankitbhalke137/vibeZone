@@ -36,6 +36,13 @@ export const env = {
   get mailerSecret() {
     return process.env.MAILER_SECRET?.trim() || null;
   },
+  /** Gmail SMTP credentials used by the serverless mailer (`/api/mailer/send`). */
+  get smtpUser() {
+    return required("SMTP_USER");
+  },
+  get smtpAppPassword() {
+    return required("SMTP_APP_PASSWORD");
+  },
   /** Socket.IO gateway on the VM (D5). Empty → chat falls back to polling. */
   get realtimeUrl() {
     return (process.env.NEXT_PUBLIC_REALTIME_URL ?? "").trim().replace(/\/$/, "") || null;
