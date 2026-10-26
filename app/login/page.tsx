@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, FormError, Input, Label } from "@/components/ui/form";
+import { ga } from "@/lib/ga";
 
 function LoginForm() {
   const router = useRouter();
@@ -58,6 +59,8 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Verification failed.");
+      if (data.isNew) ga.signUp();
+      else ga.login();
       router.push(data.onboarded ? next : "/onboarding");
       router.refresh();
     } catch (err) {

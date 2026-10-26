@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser, HttpError, requireUser } from "@/lib/auth";
 import { getSession, slideSession } from "@/lib/session";
+import { isValidAvatarUrl } from "@/lib/avatars";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,9 +25,15 @@ const Patch = z.object({
     .toLowerCase()
     .regex(/^[a-z0-9_]{3,20}$/, "3–20 chars: a–z, 0–9, _")
     .optional(),
-  bio: z.string().trim().max(300).optional(),
+  bio: z.string().trim().max(300).nullable().optional(),
   branch: z.string().trim().max(50).nullable().optional(),
   year: z.number().int().min(1).max(4).nullable().optional(),
+  avatarUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => v === "" || isValidAvatarUrl(v), "Pick a preset avatar or a valid image URL")
+    .optional(),
   completeOnboarding: z.boolean().optional(),
 });
 
@@ -42,16 +49,22 @@ export async function PATCH(req: Request) {
       );
     }
     const { completeOnboarding, ...data } = parsed.data;
+    const clean = {
+      ...data,
+      ...(data.avatarUrl !== undefined
+        ? { avatarUrl: data.avatarUrl === "" ? null : data.avatarUrl }
+        : {}),
+    };
 
-    if (data.handle && data.handle !== me.handle) {
-      const clash = await db.user.findUnique({ where: { handle: data.handle } });
+    if (clean.handle && clean.handle !== me.handle) {
+      const clash = await db.user.findUnique({ where: { handle: clean.handle } });
       if (clash) return NextResponse.json({ error: "That handle is taken." }, { status: 409 });
     }
 
     const user = await db.user.update({
       where: { id: me.id },
       data: {
-        ...data,
+        ...clean,
         ...(completeOnboarding ? { onboardedAt: new Date() } : {}),
       },
     });

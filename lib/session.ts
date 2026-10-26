@@ -6,12 +6,12 @@ import { env } from "@/lib/env";
 export const SESSION_COOKIE = "vz_session";
 export const SESSION_DAYS = 7; // FR-AUTH-004
 
-export type Session = { sub: string; role: string };
+export type Session = { sub: string; role: string; sv: number };
 
 const key = () => new TextEncoder().encode(env.sessionSecret);
 
 export async function signSession(s: Session): Promise<string> {
-  return new SignJWT({ role: s.role })
+  return new SignJWT({ role: s.role, sv: s.sv })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(s.sub)
     .setIssuedAt()
@@ -24,10 +24,29 @@ export async function verifySessionToken(token?: string | null): Promise<Session
   try {
     const { payload } = await jwtVerify(token, key());
     if (!payload.sub) return null;
-    return { sub: payload.sub, role: String(payload.role ?? "student") };
+    return {
+      sub: payload.sub,
+      role: String(payload.role ?? "student"),
+      sv: Number(payload.sv ?? 0),
+    };
   } catch {
     return null;
   }
+}
+
+/**
+ * Short-lived token for the Socket.IO gateway (FR-CHAT-002). The session cookie
+ * is httpOnly and the gateway lives on another origin, so the server mints this
+ * 1-hour token and hands it to the client component.
+ */
+export async function signRealtimeToken(session: Session): Promise<string> {
+  return new SignJWT({ role: session.role, sv: session.sv, scope: "realtime" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(session.sub)
+    .setAudience("vibezone-realtime")
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(key());
 }
 
 /** Sets the session cookie (httpOnly, Secure in prod, SameSite=Lax — FR-AUTH-004). */

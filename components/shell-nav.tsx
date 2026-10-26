@@ -4,16 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { Home, CalendarDays, MessagesSquare, BookOpen, User, Sun, Moon } from "lucide-react";
+import { Home, CalendarDays, MessagesSquare, BookOpen, User, Sun, Moon, Megaphone, Trophy, Shield, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Me = { handle: string; role: string; onboardedAt: string | null } | null;
 
 const nav = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/announcements", label: "News", icon: Megaphone },
   { href: "/events", label: "Events", icon: CalendarDays },
   { href: "/chat", label: "Chat", icon: MessagesSquare },
   { href: "/notes", label: "Notes", icon: BookOpen },
+  { href: "/polls", label: "Polls", icon: Trophy },
+  { href: "/feedback", label: "Feedback", icon: Shield },
+  { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/profile", label: "Me", icon: User },
 ];
 

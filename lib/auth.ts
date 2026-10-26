@@ -24,6 +24,8 @@ export async function getCurrentUser(): Promise<SafeUser | null> {
   if (!session) return null;
   const u = await db.user.findUnique({ where: { id: session.sub } });
   if (!u || u.status !== "active") return null;
+  // "Sign out everywhere" (FR-AUTH-004): token sv must match the stored version
+  if (session.sv !== u.sessionVersion) return null;
   return {
     id: u.id,
     email: u.email,

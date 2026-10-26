@@ -36,6 +36,32 @@ export const env = {
   get mailerSecret() {
     return process.env.MAILER_SECRET?.trim() || null;
   },
+  /** Socket.IO gateway on the VM (D5). Empty → chat falls back to polling. */
+  get realtimeUrl() {
+    return (process.env.NEXT_PUBLIC_REALTIME_URL ?? "").trim().replace(/\/$/, "") || null;
+  },
+  /** Server-to-gateway publish secret (never exposed to the browser). */
+  get realtimeSecret() {
+    return process.env.REALTIME_SECRET?.trim() || null;
+  },
+  /** Web Push (FR-NOTIF-002). All three are required to actually send. */
+  get vapidPublicKey() {
+    return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim() || null;
+  },
+  get vapidPrivateKey() {
+    return process.env.VAPID_PRIVATE_KEY?.trim() || null;
+  },
+  get vapidSubject() {
+    return process.env.VAPID_SUBJECT?.trim() || "mailto:vibezoneioi25@gmail.com";
+  },
+  /** Comma-separated keyword list for the chat filter (FR-CHAT-007). */
+  get profanityList() {
+    return list(process.env.CHAT_FILTER_WORDS);
+  },
+  /** Salt for anonymous feedback ip_hash (FR-FB-002). Falls back to the session secret. */
+  get feedbackSalt() {
+    return process.env.FEEDBACK_SALT?.trim() || this.sessionSecret;
+  },
   get appUrl() {
     return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   },
