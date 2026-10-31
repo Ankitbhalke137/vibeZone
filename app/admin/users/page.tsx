@@ -27,8 +27,10 @@ export default async function AdminUsers() {
   });
 
   const active = users.filter((user) => user.status === "active").length;
-  const staff = users.filter((user) => ["moderator", "admin"].includes(user.role)).length;
+  const staff = users.filter((user) => ["moderator", "faculty", "admin"].includes(user.role)).length;
   const seniors = users.filter((user) => user.role === "senior").length;
+  const clubLeaders = users.filter((user) => user.role === "club_leader").length;
+  const faculty = users.filter((user) => user.role === "faculty").length;
   const banned = users.filter((user) => user.status === "banned").length;
 
   return (
@@ -45,9 +47,11 @@ export default async function AdminUsers() {
         }
       />
 
-      <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 xl:grid-cols-6">
         <Stat icon={Users} label="Active" value={active} tone="bg-primary/10 text-primary" />
         <Stat icon={GraduationCap} label="Seniors" value={seniors} tone="bg-cyan-500/10 text-cyan-700 dark:text-cyan-400" />
+        <Stat icon={Users} label="Club Leaders" value={clubLeaders} tone="bg-amber-500/10 text-amber-700 dark:text-amber-400" />
+        <Stat icon={ShieldCheck} label="Faculty" value={faculty} tone="bg-violet-500/10 text-violet-700 dark:text-violet-400" />
         <Stat icon={ShieldCheck} label="Staff" value={staff} tone="bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400" />
         <Stat icon={Ban} label="Suspended" value={banned} tone="bg-danger/10 text-danger" />
       </section>
@@ -62,8 +66,8 @@ export default async function AdminUsers() {
       />
 
       <p className="text-center text-[10px] text-muted-2">
-        Roles: student → senior → moderator → admin. Moderators can suspend and restore accounts;
-        only admins can change roles.
+        Roles: student → senior → club_leader → moderator → faculty → admin. Moderators and faculty
+        can suspend and restore accounts; only admins can change roles.
       </p>
     </div>
   );

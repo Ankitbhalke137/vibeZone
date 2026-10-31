@@ -26,7 +26,7 @@ model User {
   bio          String?   @db.VarChar(300)
   branch       String?   @db.VarChar(50)
   year         Int?      @db.SmallInt
-  role         String    @default("student") @db.VarChar(15) // student|senior|moderator|admin
+  role         String    @default("student") @db.VarChar(20) // student|senior|club_leader|moderator|faculty|admin
   status       String    @default("active") @db.VarChar(12) // active|banned|deleted
   expertise    Json? // senior tags: ["DSA","Placements"]
   onboardedAt DateTime? @map("onboarded_at")

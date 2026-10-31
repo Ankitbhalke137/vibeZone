@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const Patch = z.object({
-  role: z.enum(["student", "senior", "moderator", "admin"]).optional(),
+  role: z.enum(["student", "senior", "club_leader", "moderator", "faculty", "admin"]).optional(),
   status: z.enum(["active", "banned"]).optional(),
   reason: z.string().trim().max(200).optional(),
 });

@@ -21,7 +21,7 @@ export type AdminUser = {
   createdAt: string;
 };
 
-const ROLES = ["student", "senior", "moderator", "admin"] as const;
+const ROLES = ["student", "senior", "club_leader", "moderator", "faculty", "admin"] as const;
 
 const ROLE_TONE: Record<string, BadgeTone> = {
   student: "neutral",

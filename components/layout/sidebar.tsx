@@ -34,7 +34,7 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const sections = admin ? ADMIN_NAV : MAIN_NAV;
-  const canAdmin = me && ["moderator", "admin"].includes(me.role);
+  const canAdmin = me && ["moderator", "faculty", "admin"].includes(me.role);
 
   return (
     <div className="flex h-full flex-col">

@@ -14,7 +14,7 @@ export function UserDirectory({
   selfId: string;
   canChangeRole: boolean;
 }) {
-  const [tab, setTab] = useState<"all" | "students" | "seniors" | "staff" | "banned">("all");
+  const [tab, setTab] = useState<"all" | "students" | "seniors" | "club_leaders" | "faculty" | "staff" | "banned">("all");
   const [query, setQuery] = useState("");
 
   const counts = useMemo(
@@ -22,7 +22,9 @@ export function UserDirectory({
       all: users.length,
       students: users.filter((user) => user.role === "student").length,
       seniors: users.filter((user) => user.role === "senior").length,
-      staff: users.filter((user) => ["moderator", "admin"].includes(user.role)).length,
+      clubLeaders: users.filter((user) => user.role === "club_leader").length,
+      faculty: users.filter((user) => user.role === "faculty").length,
+      staff: users.filter((user) => ["moderator", "faculty", "admin"].includes(user.role)).length,
       banned: users.filter((user) => user.status === "banned").length,
     }),
     [users],
@@ -31,7 +33,9 @@ export function UserDirectory({
   const visible = users.filter((user) => {
     if (tab === "students" && user.role !== "student") return false;
     if (tab === "seniors" && user.role !== "senior") return false;
-    if (tab === "staff" && !["moderator", "admin"].includes(user.role)) return false;
+    if (tab === "club_leaders" && user.role !== "club_leader") return false;
+    if (tab === "faculty" && user.role !== "faculty") return false;
+    if (tab === "staff" && !["moderator", "faculty", "admin"].includes(user.role)) return false;
     if (tab === "banned" && user.status !== "banned") return false;
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -66,6 +70,8 @@ export function UserDirectory({
             { value: "all", label: "All", count: counts.all },
             { value: "students", label: "Students", count: counts.students },
             { value: "seniors", label: "Seniors", count: counts.seniors },
+            { value: "club_leaders", label: "Club Leaders", count: counts.clubLeaders },
+            { value: "faculty", label: "Faculty", count: counts.faculty },
             { value: "staff", label: "Staff", count: counts.staff },
             { value: "banned", label: "Banned", count: counts.banned },
           ]}
