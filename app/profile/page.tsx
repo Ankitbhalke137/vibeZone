@@ -1,96 +1,182 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Heart,
+  Mail,
+  MessageSquare,
+  NotebookPen,
+  Pencil,
+  Settings,
+  Sparkles,
+  Trophy,
+} from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Card } from "@/components/ui/form";
-import { Avatar } from "@/components/avatar";
-import { LogoutButton } from "@/components/logout-button";
+import { listPosts } from "@/lib/posts";
+import { Feed } from "@/components/feed/feed";
+import { ProfileHero } from "@/components/profile/profile-hero";
 import { ProfileEditor, SignOutEverywhereButton } from "@/components/profile-editor";
+import { LogoutButton } from "@/components/logout-button";
+import { SectionHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
-
-const roleLabel: Record<string, string> = {
-  student: "Student",
-  senior: "Senior",
-  moderator: "Moderator",
-  admin: "Admin",
-};
+export const metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
-  // middleware.ts already guarantees a session for this route
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/profile");
 
-  const [stats, points] = await Promise.all([
-    db.message.count({ where: { senderId: user.id, deletedAt: null } }),
+  const [postCount, commentCount, points, likesReceived, messages, posts] = await Promise.all([
+    db.post.count({ where: { authorId: user.id, deletedAt: null } }).catch(() => 0),
+    db.postComment.count({ where: { authorId: user.id, deletedAt: null } }).catch(() => 0),
     db.pointLedger.aggregate({ _sum: { points: true }, where: { userId: user.id } }),
+    db.postLike
+      .count({ where: { post: { authorId: user.id, deletedAt: null } } })
+      .catch(() => 0),
+    db.message.count({ where: { senderId: user.id, deletedAt: null } }),
+    listPosts({ viewerId: user.id, authorId: user.id, take: 8, limitComments: 2 }),
   ]);
 
+  const joined = user.onboardedAt
+    ? new Date(user.onboardedAt).toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+    : null;
+
   return (
-    <div className="mx-auto max-w-md py-6">
-      <h1 className="mb-5 text-2xl font-bold">Profile</h1>
+    <div className="mx-auto flex max-w-5xl flex-col gap-4">
+      <ProfileHero
+        name={user.name}
+        handle={user.handle}
+        avatarUrl={user.avatarUrl}
+        role={user.role}
+        bio={user.bio}
+        branch={user.branch}
+        year={user.year}
+        joinedLabel={joined ?? undefined}
+        eyebrow="Your profile"
+        action={
+          <div className="flex items-center gap-1.5">
+            <a
+              href="#account"
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-2.5 text-[10px] font-semibold text-muted shadow-sm transition hover:text-foreground"
+            >
+              <Pencil size={11} /> Edit
+            </a>
+            <Link
+              href="/settings"
+              aria-label="Settings"
+              className="grid size-8 place-items-center rounded-lg border border-border bg-card text-muted shadow-sm transition hover:text-foreground"
+            >
+              <Settings size={13} />
+            </Link>
+          </div>
+        }
+        stats={[
+          { label: "Points", value: (points._sum.points ?? 0).toLocaleString("en-IN"), hint: "All time" },
+          { label: "Posts", value: postCount, hint: "On campus feed" },
+          { label: "Comments", value: commentCount, hint: "Conversations" },
+          { label: "Likes", value: likesReceived, hint: "Received" },
+        ]}
+      />
 
-      <Card className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <Avatar name={user.name} handle={user.handle} avatarUrl={user.avatarUrl} size="lg" />
-          <div className="min-w-0">
-            <p className="truncate text-lg font-semibold">{user.name}</p>
-            <p className="truncate text-sm text-muted">@{user.handle}</p>
-            <p className="mt-1 inline-flex rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-primary">
-              {roleLabel[user.role] ?? user.role}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="flex min-w-0 flex-col gap-3">
+          <section className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <SectionHeader
+                title="Your posts"
+                description={`${postCount} post${postCount === 1 ? "" : "s"} shared with campus`}
+                icon={<NotebookPen size={14} />}
+              />
+              <Link
+                href="/create"
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-lg bg-primary px-2.5 text-[10px] font-bold text-white transition hover:brightness-110"
+              >
+                New post <ArrowUpRight size={10} />
+              </Link>
+            </div>
+            <Feed
+              initialPosts={posts.posts}
+              initialCursor={posts.nextCursor}
+              viewer={user}
+              authorId={user.id}
+              emptyTitle="Your feed is waiting"
+              emptyDescription="Share an update, a question or a win. Your posts will collect here."
+            />
+          </section>
+        </div>
+
+        <aside id="account" className="flex min-w-0 flex-col gap-3 scroll-mt-20">
+          <section className="vz-panel p-4">
+            <SectionHeader
+              title="Account details"
+              description="Only visible to you"
+              icon={<Sparkles size={14} />}
+            />
+            <dl className="mt-3 flex flex-col gap-2 text-[10.5px]">
+              <div className="flex items-center justify-between gap-3">
+                <dt className="inline-flex items-center gap-1 text-muted">
+                  <Mail size={10} /> Email
+                </dt>
+                <dd className="truncate font-semibold">{user.email}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="inline-flex items-center gap-1 text-muted">
+                  <CalendarDays size={10} /> Joined
+                </dt>
+                <dd className="font-semibold">{joined ?? "—"}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="inline-flex items-center gap-1 text-muted">
+                  <Trophy size={10} /> Role
+                </dt>
+                <dd className="font-semibold capitalize">{user.role}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="inline-flex items-center gap-1 text-muted">
+                  <Heart size={10} /> Messages
+                </dt>
+                <dd className="font-semibold">{messages.toLocaleString("en-IN")}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="vz-panel p-4">
+            <SectionHeader title="Edit profile" description="Name, handle, bio and avatar" />
+            <div className="mt-3">
+              <ProfileEditor
+                me={{
+                  name: user.name,
+                  handle: user.handle,
+                  avatarUrl: user.avatarUrl,
+                  bio: user.bio,
+                  branch: user.branch,
+                  year: user.year,
+                  email: user.email,
+                  role: user.role,
+                }}
+              />
+            </div>
+          </section>
+
+          <section className="vz-panel p-4">
+            <div className="flex items-center gap-2 text-[10.5px] font-bold">
+              <MessageSquare size={12} className="text-primary" /> Sessions
+            </div>
+            <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
+              Sign out of this device, or end every session if you think your account was accessed
+              somewhere else.
             </p>
-          </div>
-        </div>
-
-        {user.bio ? <p className="text-sm leading-relaxed text-muted">{user.bio}</p> : null}
-
-        <dl className="grid grid-cols-3 gap-3 border-t border-border pt-4 text-center text-sm">
-          <div>
-            <dt className="text-xs text-muted">Points</dt>
-            <dd className="font-semibold">{points._sum.points ?? 0}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted">Messages</dt>
-            <dd className="font-semibold">{stats}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted">Year</dt>
-            <dd className="font-semibold">{user.year ? `Y${user.year}` : "—"}</dd>
-          </div>
-        </dl>
-
-        <dl className="flex flex-col gap-1.5 border-t border-border pt-4 text-sm">
-          <div className="flex justify-between gap-3">
-            <dt className="text-xs text-muted">Branch</dt>
-            <dd className="truncate font-medium">{user.branch ?? "—"}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-xs text-muted">Campus email</dt>
-            <dd className="truncate font-medium">{user.email}</dd>
-          </div>
-        </dl>
-
-        <div className="border-t border-border pt-4">
-          <ProfileEditor
-            me={{
-              name: user.name,
-              handle: user.handle,
-              avatarUrl: user.avatarUrl,
-              bio: user.bio,
-              branch: user.branch,
-              year: user.year,
-              email: user.email,
-              role: user.role,
-            }}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-border pt-4">
-          <LogoutButton />
-          <div className="text-center">
-            <SignOutEverywhereButton />
-          </div>
-        </div>
-      </Card>
+            <div className="mt-3 flex flex-col gap-2">
+              <LogoutButton />
+              <div className="text-center">
+                <SignOutEverywhereButton />
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }

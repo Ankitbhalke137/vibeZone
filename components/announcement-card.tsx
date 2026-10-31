@@ -2,29 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Pin } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowUpRight, Pin } from "lucide-react";
 import { ga } from "@/lib/ga";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
 
-const CATEGORY_STYLE: Record<string, string> = {
-  Urgent: "bg-danger/10 text-danger border-danger/30",
-  Academic: "bg-accent text-primary",
-  Placements: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  Events: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  Hostel: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  Clubs: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
+const TONES: Record<string, BadgeTone> = {
+  Urgent: "red",
+  Academic: "violet",
+  Placements: "amber",
+  Events: "magenta",
+  Hostel: "cyan",
+  Clubs: "green",
 };
 
 export function CategoryBadge({ category }: { category: string }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border border-transparent px-2 py-0.5 text-[11px] font-semibold",
-        CATEGORY_STYLE[category] ?? "bg-accent text-primary",
-      )}
-    >
+    <Badge tone={TONES[category] ?? "violet"} className="normal-case tracking-normal">
       {category}
-    </span>
+    </Badge>
   );
 }
 
@@ -47,7 +42,7 @@ export function AnnouncementCard({
 }) {
   const tracked = useRef(false);
 
-  // FR-ANN-005 — fire the impression exactly once per mount
+  // FR-ANN-005 — impression fires once per mount
   useEffect(() => {
     if (tracked.current) return;
     tracked.current = true;
@@ -70,16 +65,16 @@ export function AnnouncementCard({
         }).catch(() => {});
         ga.announcementClick(id);
       }}
-      className="block rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/40 hover:shadow"
+      className="vz-panel vz-card-hover group block p-4"
     >
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         {pinned ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-            <Pin size={11} aria-hidden /> Pinned
-          </span>
+          <Badge tone="violet" className="normal-case tracking-normal">
+            <Pin size={10} /> Pinned
+          </Badge>
         ) : null}
         <CategoryBadge category={category} />
-        <span className="ml-auto text-[11px] text-muted">
+        <span className="ml-auto text-[10px] font-medium text-muted">
           {new Date(publishAt).toLocaleDateString("en-IN", {
             day: "numeric",
             month: "short",
@@ -87,9 +82,16 @@ export function AnnouncementCard({
           })}
         </span>
       </div>
-      <h2 className="text-base font-semibold leading-snug">{title}</h2>
-      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">{excerpt}</p>
-      {authorName ? <p className="mt-2 text-[11px] text-muted">by {authorName}</p> : null}
+      <h2 className="mt-2 text-[15px] font-bold leading-snug transition group-hover:text-primary">
+        {title}
+      </h2>
+      <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-muted">{excerpt}</p>
+      <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-[var(--vz-border-soft)] pt-2.5">
+        <span className="text-[10px] text-muted-2">{authorName ? `by ${authorName}` : "Campus team"}</span>
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary opacity-0 transition group-hover:opacity-100">
+          Read <ArrowUpRight size={11} />
+        </span>
+      </div>
     </Link>
   );
 }

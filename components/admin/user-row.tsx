@@ -2,13 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Ban, Check, Mail, ShieldCheck } from "lucide-react";
 import { Avatar } from "@/components/avatar";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 
-type User = {
+export type AdminUser = {
   id: string;
   handle: string;
   name: string;
   email: string;
+  avatarUrl: string | null;
   role: string;
   status: string;
   branch: string | null;
@@ -18,16 +23,24 @@ type User = {
 
 const ROLES = ["student", "senior", "moderator", "admin"] as const;
 
+const ROLE_TONE: Record<string, BadgeTone> = {
+  student: "neutral",
+  senior: "cyan",
+  moderator: "violet",
+  admin: "magenta",
+};
+
 export function UserRow({
   user,
   self,
   canChangeRole,
 }: {
-  user: User;
+  user: AdminUser;
   self: boolean;
   canChangeRole: boolean;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const banned = user.status === "banned";
@@ -43,9 +56,16 @@ export function UserRow({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed.");
+      toast({
+        title: body.role ? "Role updated" : banned ? "Account restored" : "Account suspended",
+        description: `@${user.handle}`,
+        tone: "success",
+      });
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed.");
+      const message = err instanceof Error ? err.message : "Failed.";
+      setError(message);
+      toast({ title: "Couldn't update account", description: message, tone: "error" });
     } finally {
       setBusy(false);
     }
@@ -53,55 +73,78 @@ export function UserRow({
 
   return (
     <div className="flex flex-wrap items-center gap-3 px-4 py-3">
-      <Avatar name={user.name} handle={user.handle} size="sm" />
+      <Avatar name={user.name} handle={user.handle} avatarUrl={user.avatarUrl} size="sm" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">
-          {user.name} <span className="font-normal text-muted">@{user.handle}</span>
-          {self ? <span className="ml-1.5 text-[11px] text-primary">(you)</span> : null}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <p className="truncate text-[12px] font-bold">
+            {user.name} <span className="font-normal text-muted">@{user.handle}</span>
+          </p>
+          <Badge tone={ROLE_TONE[user.role] ?? "neutral"} className="normal-case tracking-normal">
+            {user.role}
+          </Badge>
+          {banned ? (
+            <Badge tone="red" className="normal-case tracking-normal">
+              banned
+            </Badge>
+          ) : null}
+          {self ? <span className="text-[9px] font-semibold text-primary">(you)</span> : null}
+        </div>
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[9.5px] text-muted">
+          <span className="inline-flex items-center gap-0.5">
+            <Mail size={8} /> {user.email}
+          </span>
+          <span>· {user.branch ?? "—"}</span>
+          {user.year ? <span>· Y{user.year}</span> : null}
         </p>
-        <p className="truncate text-[11px] text-muted">
-          {user.email} · {user.branch ?? "—"} {user.year ? `· Y${user.year}` : ""}
-        </p>
-        {error ? <p className="text-[11px] text-danger">{error}</p> : null}
+        {error ? <p className="mt-0.5 text-[10px] text-danger">{error}</p> : null}
       </div>
 
-      <div className="flex items-center gap-2">
-        {banned ? (
-          <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[11px] font-semibold text-danger">
-            banned
-          </span>
-        ) : null}
-
-        <select
-          aria-label={`Role for @${user.handle}`}
-          value={user.role}
-          disabled={self || !canChangeRole || busy}
-          onChange={(e) => patch({ role: e.target.value, reason: "dashboard change" })}
-          className="h-8 rounded-lg border border-border bg-background px-2 text-xs outline-none disabled:opacity-50"
-        >
-          {ROLES.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
+      <div className="flex items-center gap-1.5">
+        <div className="relative">
+          <ShieldCheck
+            size={11}
+            className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-2"
+          />
+          <select
+            aria-label={`Role for @${user.handle}`}
+            value={user.role}
+            disabled={self || !canChangeRole || busy}
+            onChange={(e) => patch({ role: e.target.value, reason: "role updated from admin console" })}
+            className="h-8 appearance-none rounded-lg border border-border bg-background pl-6 pr-5 text-[10px] font-semibold capitalize outline-none transition hover:border-primary/30 disabled:opacity-50"
+          >
+            {ROLES.map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {!self ? (
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="ghost"
             disabled={busy}
+            className={banned ? "text-success" : "text-danger hover:bg-danger/10 hover:text-danger"}
             onClick={() =>
               patch({
                 status: banned ? "active" : "banned",
-                reason: banned ? "unbanned from dashboard" : "banned from dashboard",
+                reason: banned ? "restored from admin console" : "suspended from admin console",
               })
             }
-            className={`h-8 rounded-lg border border-border px-2.5 text-xs font-medium transition disabled:opacity-50 ${
-              banned ? "text-success hover:bg-accent" : "text-danger hover:bg-danger/10"
-            }`}
           >
-            {busy ? "…" : banned ? "Unban" : "Ban"}
-          </button>
+            {busy ? (
+              "…"
+            ) : banned ? (
+              <>
+                <Check size={11} /> Restore
+              </>
+            ) : (
+              <>
+                <Ban size={11} /> Suspend
+              </>
+            )}
+          </Button>
         ) : null}
       </div>
     </div>

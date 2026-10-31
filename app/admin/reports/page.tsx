@@ -1,9 +1,10 @@
+import { Flag, Mail, MessageSquare, ShieldCheck } from "lucide-react";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { Flag, Shield, User, Ban, Mail, Clock } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { ReportQueue } from "@/components/admin/report-queue";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Reports · Admin" };
 
 const TYPE_LABEL: Record<string, string> = {
   message: "Chat message",
@@ -13,17 +14,14 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export default async function AdminReportsPage() {
-  const me = await requireUser("moderator");
-  if (!me) redirect("/login?next=/admin/reports");
-
   const [messageReports, contentReports] = await Promise.all([
     db.messageReport.findMany({
       where: { status: "open" },
       orderBy: { createdAt: "desc" },
       take: 50,
       include: {
-        message: { select: { body: true, channelId: true, senderId: true, createdAt: true } },
-        reporter: { select: { handle: true, name: true } },
+        message: { select: { body: true } },
+        reporter: { select: { handle: true } },
       },
     }),
     db.contentReport.findMany({
@@ -36,100 +34,92 @@ export default async function AdminReportsPage() {
     }),
   ]);
 
-  const totalOpen = messageReports.length + contentReports.length;
+  const total = messageReports.length + contentReports.length;
 
   return (
-    <div className="mx-auto max-w-3xl py-6">
-      <nav className="mb-6">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">Moderation Queue</h1>
-            <p className="text-sm text-muted">{totalOpen} open reports · 24 h SLA</p>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <Shield size={14} aria-hidden />
-          </div>
-        </div>
-      </nav>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        eyebrow="Moderation"
+        title="Reports"
+        description="Review flagged messages and campus resources. Resolve reports within 24 hours and keep the audit trail clean."
+        actions={
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold text-muted">
+            <ShieldCheck size={12} className="text-primary" /> Moderator access
+          </span>
+        }
+      />
 
-      <div className="grid gap-4">
-        {/* Message reports */}
-        <section className="rounded-2xl border border-border bg-card">
-          <div className="border-b border-border px-4 py-3 flex items-center gap-2">
-            <Flag size={16} aria-hidden />
-            <h2 className="text-sm font-semibold">Message Reports ({messageReports.length})</h2>
-          </div>
-          {messageReports.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted">No open message reports.</div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {messageReports.map((r) => (
-                <li key={r.id} className="flex flex-col gap-2 p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider">Message</span>
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold border ${
-                      r.reason === "abuse" ? "border-danger/20 text-danger" : "border-muted/30 text-muted"
-                    }`}>{r.reason}</span>
-                    <span className="text-[10px] text-muted">{new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
-                  </div>
-                  <p className="text-sm leading-snug">{r.message.body}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted">
-                    <span>Reported by @{r.reporter.handle}</span>
-                    <span>·</span>
-                    <span>#{r.message.channelId}</span>
-                  </div>
-                  <div className="mt-2 flex gap-2">
-                    <button className="flex-1 py-1.5 rounded-lg border border-border bg-background text-sm text-muted hover:bg-accent transition">Dismiss</button>
-                    <button className="flex-1 py-1.5 rounded-lg border border-danger/20 bg-danger/50 text-danger text-sm hover:bg-danger/100 transition">Delete message</button>
-                    <button className="flex-1 py-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-700 text-sm hover:bg-amber-200 transition">Warn user</button>
-                    <button className="flex-1 py-1.5 rounded-lg border border-danger/20 bg-danger/50 text-danger text-sm hover:bg-danger/100 transition">Ban user</button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+        <StatCard
+          icon={Flag}
+          label="Open reports"
+          value={total}
+          tone="bg-primary/10 text-primary"
+        />
+        <StatCard
+          icon={MessageSquare}
+          label="Messages"
+          value={messageReports.length}
+          tone="bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400"
+        />
+        <StatCard
+          icon={Mail}
+          label="Content"
+          value={contentReports.length}
+          tone="bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
+        />
+      </section>
 
-        {/* Content reports */}
-        <section className="rounded-2xl border border-border bg-card">
-          <div className="border-b border-border px-4 py-3 flex items-center gap-2">
-            <Mail size={16} aria-hidden />
-            <h2 className="text-sm font-semibold">Content Reports ({contentReports.length})</h2>
-          </div>
-          {contentReports.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted">No open content reports.</div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {contentReports.map((r) => (
-                <li key={r.id} className="flex flex-col gap-2 p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider">{TYPE_LABEL[r.contentType]}</span>
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold border ${
-                      r.reason === "abuse" ? "border-danger/20 text-danger" : "border-muted/30 text-muted"
-                    }`}>{r.reason}</span>
-                    <span className="text-[10px] text-muted">{new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
-                  </div>
-                  {r.detail && <p className="text-sm leading-snug">{r.detail}</p>}
-                  <div className="flex items-center gap-2 text-xs text-muted">
-                    <span>Reported by @{r.reporter?.handle ?? "anonymous"}</span>
-                  </div>
-                  <div className="mt-2 flex gap-2">
-                    <button className="flex-1 py-1.5 rounded-lg border border-border bg-background text-sm text-muted hover:bg-accent transition">Dismiss</button>
-                    <button className="flex-1 py-1.5 rounded-lg border border-danger/20 bg-danger/50 text-danger text-sm hover:bg-danger/100 transition">Remove content</button>
-                    <button className="flex-1 py-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-700 text-sm hover:bg-amber-200 transition">Warn user</button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+      <ReportQueue
+        messageReports={messageReports.map((r) => ({
+          id: r.id,
+          contentId: r.messageId,
+          reporter: `@${r.reporter.handle}`,
+          reason: r.reason,
+          status: r.status,
+          context: r.message.body,
+          createdAt: r.createdAt.toISOString(),
+        }))}
+        contentReports={contentReports.map((r) => ({
+          id: r.id,
+          contentType: r.contentType,
+          contentId: r.contentId,
+          reporter: r.reporter ? `@${r.reporter.handle}` : "anonymous",
+          reason: r.reason,
+          detail: r.detail,
+          status: r.status,
+          createdAt: r.createdAt.toISOString(),
+        }))}
+      />
 
-      <div className="mt-6 rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-2 text-sm font-semibold">Reveal alias</h3>
-        <p className="text-xs text-muted mb-3">
-          To reveal the real identity behind an alias, use the <code className="bg-background px-1 py-0.5 rounded text-xs">reveal-alias</code> moderation action with a mandatory reason. Every reveal is written to the audit log.
-        </p>
+      <p className="text-center text-[10px] text-muted-2">
+        Content types:{" "}
+        {Object.values(TYPE_LABEL).join(" · ")}. Alias reveals are handled with a mandatory reason
+        and a separate audit entry.
+      </p>
+    </div>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ComponentType<{ size?: number | string }>;
+  label: string;
+  value: number;
+  tone: string;
+}) {
+  return (
+    <div className="vz-panel flex items-center gap-2.5 p-3">
+      <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${tone}`}>
+        <Icon size={16} />
+      </span>
+      <div>
+        <p className="text-lg font-black leading-none">{value}</p>
+        <p className="mt-0.5 text-[10px] text-muted">{label}</p>
       </div>
     </div>
   );

@@ -21,7 +21,10 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
 
   const channel = await db.channel.findUnique({
     where: { slug },
-    include: { members: { where: { userId: me.id }, take: 1 } },
+    include: {
+      members: { where: { userId: me.id }, take: 1 },
+      _count: { select: { members: true } },
+    },
   });
   if (!channel || channel.archivedAt) notFound();
 
@@ -69,6 +72,7 @@ export default async function ChannelPage({ params }: { params: Promise<{ slug: 
           name: channel.name,
           type: channel.type,
           topic: channel.topic,
+          memberCount: channel._count.members,
         }}
         me={{ id: me.id, name: me.name, handle: me.handle, avatarUrl: me.avatarUrl }}
         initialMessages={messages}

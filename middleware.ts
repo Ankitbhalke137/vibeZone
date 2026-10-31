@@ -3,7 +3,12 @@ import { jwtVerify } from "jose";
 
 const COOKIE = "vz_session";
 
-/** PRD FR-AUTH-004/005 — session gate for profile & onboarding routes. */
+/**
+ * Session gate for the authenticated campus app (PRD FR-AUTH-004/005).
+ *
+ * Public surfaces stay open: `/` (landing), `/login`, and the anonymous
+ * feedback page. Everything inside the campus shell requires a valid session.
+ */
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get(COOKIE)?.value;
   let ok = false;
@@ -19,7 +24,7 @@ export async function middleware(req: NextRequest) {
 
   if (!ok) {
     const url = new URL("/login", req.url);
-    url.searchParams.set("next", req.nextUrl.pathname);
+    url.searchParams.set("next", `${req.nextUrl.pathname}${req.nextUrl.search}`);
     const res = NextResponse.redirect(url);
     res.cookies.delete(COOKIE);
     return res;
@@ -28,5 +33,25 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile", "/onboarding", "/admin"],
+  matcher: [
+    "/home/:path*",
+    "/explore/:path*",
+    "/create/:path*",
+    "/bookmarks/:path*",
+    "/settings/:path*",
+    "/notifications/:path*",
+    "/post/:path*",
+    "/profile/:path*",
+    "/onboarding/:path*",
+    "/admin/:path*",
+    "/chat/:path*",
+    "/u/:path*",
+    "/announcements/:path*",
+    "/events/:path*",
+    "/notes/:path*",
+    "/polls/:path*",
+    "/leaderboard/:path*",
+    "/lost-and-found/:path*",
+    "/mentorship/:path*",
+  ],
 };

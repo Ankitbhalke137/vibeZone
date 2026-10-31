@@ -62,6 +62,10 @@ model User {
   contentReportsFiled   ContentReport[] @relation("ContentReporter")
   contentReportsHandled ContentReport[] @relation("ContentReportHandler")
   auditLogs     AuditLog[]
+  posts         Post[]
+  postLikes     PostLike[]
+  postComments  PostComment[]
+  postBookmarks PostBookmark[]
 
   @@index([role])
   @@map("users")
@@ -493,6 +497,69 @@ model BlockedUser {
 
   @@id([blockerId, blockedId])
   @@map("blocked_users")
+}
+
+// ============ Social feed ============
+// Community posts layered on top of the moderated campus modules.
+
+model Post {
+  id         String    @id @default(uuid()) @db.Uuid
+  authorId   String    @map("author_id") @db.Uuid
+  body       String    @db.Text
+  imageUrl   String?   @map("image_url")
+  visibility String    @default("campus") @db.VarChar(12) // campus|public
+  tags       String[]  @default([])
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     PostLike[]
+  comments  PostComment[]
+  bookmarks PostBookmark[]
+
+  @@index([createdAt(sort: Desc)])
+  @@index([authorId, createdAt(sort: Desc)])
+  @@map("posts")
+}
+
+model PostLike {
+  postId    String   @map("post_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id        String    @id @default(uuid()) @db.Uuid
+  postId    String    @map("post_id") @db.Uuid
+  authorId  String    @map("author_id") @db.Uuid
+  body      String    @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@map("post_comments")
+}
+
+model PostBookmark {
+  postId    String   @map("post_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@map("post_bookmarks")
 }
 
 model AuditLog {

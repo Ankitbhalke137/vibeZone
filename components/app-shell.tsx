@@ -1,17 +1,18 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { SiteShell } from "@/components/site-shell";
+import { AppLayout } from "@/components/layout/app-layout";
 
 /**
- * Chooses the chrome for a route:
- *  · `/` renders the full VibeZone dashboard (sidebar + topbar + right rail)
- *  · every other route keeps the mobile-first site shell
+ * Route chrome:
+ *  · `/`                    → public marketing landing (no app chrome)
+ *  · `/login`, `/onboarding` → focused authentication screens
+ *  · everything else         → the unified campus shell
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isDashboard = pathname === "/";
-  if (isDashboard) return <DashboardShell>{children}</DashboardShell>;
-  return <SiteShell>{children}</SiteShell>;
+  const bare = pathname === "/" || pathname === "/login" || pathname === "/onboarding";
+
+  if (bare) return <>{children}</>;
+  return <AppLayout>{children}</AppLayout>;
 }
