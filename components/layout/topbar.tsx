@@ -48,7 +48,7 @@ export function Topbar({
     router.refresh();
   }
 
-  const canAdmin = me && ["moderator", "admin"].includes(me.role);
+  const canAdmin = me && ["moderator", "faculty", "admin"].includes(me.role);
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-2.5 border-b border-border bg-background/85 px-3 backdrop-blur-xl sm:gap-3 sm:px-5 lg:px-6">

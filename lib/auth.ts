@@ -15,7 +15,14 @@ export type SafeUser = {
   onboardedAt: Date | null;
 };
 
-export const ROLE_RANK = { student: 0, senior: 1, moderator: 2, admin: 3 } as const;
+export const ROLE_RANK = {
+  student: 0,
+  senior: 1,
+  club_leader: 2,
+  moderator: 3,
+  faculty: 4,
+  admin: 5,
+} as const;
 export type Role = keyof typeof ROLE_RANK;
 
 /** Resolves the session → user row (or null). */
