@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/app-shell";
+import { ToastProvider } from "@/components/ui/toast";
 import { gaInitSnippet } from "@/lib/ga";
 import "./globals.css";
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · VibeZone",
   },
   description:
-    "Announcements, chat, events, notes, polls and more for the PW IOI campus. One moderated, gamified, mobile-friendly web app.",
+    "Your campus in one place: announcements, chat, events, notes, polls, Lost & Found, mentorship and more for the PW IOI campus.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.svg",
@@ -27,8 +28,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#07070c" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f6ff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0b18" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -39,7 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
         <ThemeProvider>
-          <AppShell>{children}</AppShell>
+          <ToastProvider>
+            <AppShell>{children}</AppShell>
+          </ToastProvider>
         </ThemeProvider>
         {GA_ID ? (
           <>

@@ -3,114 +3,134 @@
 /* Class-based dark mode (next-themes adds `.dark` to <html>) */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-
-  --color-background: #f8fafc;
-  --color-foreground: #0f172a;
-  --color-card: #ffffff;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-primary: #4f46e5;
-  --color-primary-foreground: #ffffff;
-  --color-accent: #eef2ff;
-  --color-danger: #dc2626;
-  --color-success: #16a34a;
-
-  --radius-md: 0.75rem;
+/* ============================================================
+   VibeZone design tokens
+   Light lavender is the default. The dark theme is designed
+   separately rather than inverted.
+   ============================================================ */
+:root {
+  --vz-bg: #f7f6ff;
+  --vz-bg-soft: #ffffff;
+  --vz-card: #ffffff;
+  --vz-card-2: #fbfaff;
+  --vz-card-3: #f1eeff;
+  --vz-border: #e9e6f5;
+  --vz-border-soft: #f1effa;
+  --vz-text: #17152b;
+  --vz-muted: #77758b;
+  --vz-muted-2: #9b98ab;
+  --vz-violet: #7047f5;
+  --vz-violet-2: #8b5cf6;
+  --vz-magenta: #a855f7;
+  --vz-green: #22c55e;
+  --vz-amber: #f59e0b;
+  --vz-red: #ef4444;
+  --vz-cyan: #0891b2;
+  --vz-ring: rgba(112, 71, 245, 0.18);
+  --vz-shadow: 0 10px 30px -18px rgba(23, 21, 43, 0.22);
+  --vz-shadow-lg: 0 24px 60px -30px rgba(112, 71, 245, 0.5);
+  color-scheme: light;
 }
 
 .dark {
-  --color-background: #0b1120;
-  --color-foreground: #e2e8f0;
-  --color-card: #111827;
-  --color-muted: #94a3b8;
-  --color-border: #1f2937;
-  --color-primary: #818cf8;
-  --color-primary-foreground: #0b1120;
-  --color-accent: #1e1b4b;
-  --color-danger: #f87171;
-  --color-success: #4ade80;
-}
-
-body {
-  text-rendering: optimizeLegibility;
-}
-
-/* PWA standalone: keep content clear of the bottom nav */
-@supports (display: env(safe-area-inset-bottom)) {
-  main {
-    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
-  }
-}
-
-/* ============================================================
-   VibeZone dashboard — image-matched dark UI (scoped to .vz-dash)
-   ============================================================ */
-.vz-dash {
-  --vz-bg: #07070c;
-  --vz-bg-soft: #0a0a11;
-  --vz-card: #121219;
-  --vz-card-2: #171720;
-  --vz-card-3: #1d1d28;
-  --vz-border: #23232f;
-  --vz-border-soft: #1a1a23;
-  --vz-text: #f4f4f7;
-  --vz-muted: #8b8b9c;
-  --vz-muted-2: #62627a;
-  --vz-violet: #7c5cff;
-  --vz-violet-2: #a78bfa;
+  --vz-bg: #0d0b18;
+  --vz-bg-soft: #12101e;
+  --vz-card: #171426;
+  --vz-card-2: #1c1830;
+  --vz-card-3: #211b35;
+  --vz-border: #302a45;
+  --vz-border-soft: #262038;
+  --vz-text: #f8f7ff;
+  --vz-muted: #aaa5be;
+  --vz-muted-2: #7e7894;
+  --vz-violet: #8b5cf6;
+  --vz-violet-2: #c084fc;
   --vz-magenta: #d946ef;
   --vz-green: #4ade80;
   --vz-amber: #fbbf24;
   --vz-red: #f87171;
   --vz-cyan: #22d3ee;
+  --vz-ring: rgba(139, 92, 246, 0.25);
+  --vz-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.6);
+  --vz-shadow-lg: 0 24px 60px -30px rgba(0, 0, 0, 0.75);
+  color-scheme: dark;
+}
 
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-background: var(--vz-bg);
+  --color-foreground: var(--vz-text);
+  --color-card: var(--vz-card);
+  --color-muted: var(--vz-muted);
+  --color-border: var(--vz-border);
+  --color-primary: var(--vz-violet);
+  --color-primary-foreground: #ffffff;
+  --color-accent: var(--vz-card-3);
+  --color-danger: var(--vz-red);
+  --color-success: var(--vz-green);
+  --color-warning: var(--vz-amber);
+
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+}
+
+html {
+  background: var(--vz-bg);
+  scroll-behavior: smooth;
+}
+
+body {
   background: var(--vz-bg);
   color: var(--vz-text);
-  color-scheme: dark;
+  text-rendering: optimizeLegibility;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Optional light appearance for the dashboard (default is the dark reference). */
-.vz-dash.vz-light {
-  --vz-bg: #f7f6fb;
-  --vz-bg-soft: #ffffff;
-  --vz-card: #ffffff;
-  --vz-card-2: #f5f4fa;
-  --vz-card-3: #eceaf5;
-  --vz-border: #e4e2ee;
-  --vz-border-soft: #efedf6;
-  --vz-text: #17151f;
-  --vz-muted: #5f5b75;
-  --vz-muted-2: #8d89a4;
-  --vz-violet: #6d4aff;
-  --vz-violet-2: #6d4aff;
-  --vz-magenta: #c026d3;
-  --vz-green: #16a34a;
-  --vz-amber: #d97706;
-  --vz-red: #dc2626;
-  --vz-cyan: #0891b2;
-
-  color-scheme: light;
-}
-.vz-dash.vz-light .vz-map {
-  background-image: radial-gradient(rgba(23, 21, 31, 0.07) 1px, transparent 1px);
-}
-.vz-dash.vz-light .vz-scroll::-webkit-scrollbar-thumb {
-  background: #d8d5e6;
+::selection {
+  background: rgba(112, 71, 245, 0.22);
+  color: var(--vz-text);
 }
 
-.vz-dash ::selection {
-  background: rgba(124, 92, 255, 0.35);
-  color: #fff;
+:focus-visible {
+  outline: 2px solid var(--vz-violet);
+  outline-offset: 2px;
 }
 
-/* Cards & surfaces */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Keeps the PWA bottom nav clear of content on mobile */
+.vz-main-safe {
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .vz-main-safe {
+    padding-bottom: 0;
+  }
+}
+
+/* ============================================================
+   Surfaces
+   ============================================================ */
 .vz-panel {
   background: var(--vz-card);
   border: 1px solid var(--vz-border);
   border-radius: 1rem;
+  box-shadow: var(--vz-shadow);
 }
 .vz-panel-2 {
   background: var(--vz-card-2);
@@ -132,48 +152,102 @@ body {
   color: var(--vz-muted-2);
 }
 
-/* Hero gradient */
+/* ============================================================
+   Brand moments
+   ============================================================ */
 .vz-hero {
   background:
-    radial-gradient(120% 150% at 0% 0%, rgba(124, 92, 255, 0.55) 0%, rgba(124, 92, 255, 0) 55%),
-    linear-gradient(120deg, #5b21b6 0%, #6d28d9 30%, #7c3aed 55%, #a21caf 82%, #d946ef 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 60px -30px rgba(124, 58, 237, 0.8);
+    radial-gradient(90% 150% at 0% 0%, rgba(168, 85, 247, 0.42) 0%, rgba(168, 85, 247, 0) 55%),
+    radial-gradient(80% 120% at 100% 20%, rgba(112, 71, 245, 0.35) 0%, rgba(112, 71, 245, 0) 55%),
+    linear-gradient(120deg, #6d3ff2 0%, #7c4dff 38%, #9b5cf6 66%, #c084fc 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), var(--vz-shadow-lg);
+}
+.dark .vz-hero {
+  background:
+    radial-gradient(90% 150% at 0% 0%, rgba(139, 92, 246, 0.5) 0%, rgba(139, 92, 246, 0) 58%),
+    radial-gradient(80% 120% at 100% 20%, rgba(217, 70, 239, 0.3) 0%, rgba(217, 70, 239, 0) 55%),
+    linear-gradient(120deg, #2a1655 0%, #3b1d75 38%, #4c238f 68%, #6b21a8 100%);
 }
 .vz-hero-glow {
   background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.22), transparent 55%);
 }
-
-/* Text gradient */
 .vz-gradient-text {
-  background: linear-gradient(90deg, #c4b5fd, #f0abfc);
+  background: linear-gradient(92deg, var(--vz-violet), var(--vz-magenta));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
+.vz-brand-gradient {
+  background-image: linear-gradient(135deg, #7047f5 0%, #8b5cf6 48%, #c084fc 100%);
+}
+.vz-soft-gradient {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(112, 71, 245, 0.12), transparent 55%),
+    radial-gradient(120% 120% at 100% 100%, rgba(192, 132, 252, 0.14), transparent 55%),
+    var(--vz-card);
+}
+.vz-landing-grid {
+  background-image:
+    linear-gradient(to right, rgba(112, 71, 245, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(112, 71, 245, 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, black 35%, transparent 75%);
+}
+.dark .vz-landing-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+}
 
-/* Subtle scrollbar */
+/* ============================================================
+   Scrolling & patterns
+   ============================================================ */
 .vz-scroll::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .vz-scroll::-webkit-scrollbar-thumb {
-  background: #2a2a38;
+  background: var(--vz-border);
   border-radius: 999px;
 }
 .vz-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
-
-/* Map dotted grid */
 .vz-map {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(112, 71, 245, 0.16) 1px, transparent 1px);
   background-size: 18px 18px;
 }
-
-/* Hide scrollbar for tab strips */
+.dark .vz-map {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+}
 .vz-no-scrollbar {
   scrollbar-width: none;
 }
 .vz-no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* ============================================================
+   Small interaction helpers
+   ============================================================ */
+.vz-card-hover {
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+.vz-card-hover:hover {
+  border-color: color-mix(in srgb, var(--vz-violet) 36%, var(--vz-border));
+  box-shadow: 0 16px 36px -24px rgba(112, 71, 245, 0.45);
+}
+.vz-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Native form controls inherit the theme */
+select,
+option {
+  color: var(--vz-text);
+  background-color: var(--vz-card);
 }
