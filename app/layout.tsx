@@ -4,6 +4,8 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/app-shell";
 import { ToastProvider } from "@/components/ui/toast";
+import { PageTransition } from "@/components/ui/page-transition";
+import { MeshBackground } from "@/components/3d/mesh-background";
 import { gaInitSnippet } from "@/lib/ga";
 import "./globals.css";
 
@@ -41,7 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
         <ThemeProvider>
           <ToastProvider>
-            <AppShell>{children}</AppShell>
+            <MeshBackground />
+            <PageTransition>
+              <AppShell>{children}</AppShell>
+            </PageTransition>
           </ToastProvider>
         </ThemeProvider>
         {GA_ID ? (

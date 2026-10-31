@@ -251,3 +251,171 @@ option {
   color: var(--vz-text);
   background-color: var(--vz-card);
 }
+
+/* ============================================================
+   High-end visual effects — glass, mesh gradients, glows
+   Light lavender is the priority; dark theme kept as secondary.
+   ============================================================ */
+
+/* Glass surfaces */
+.vz-glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+.dark .vz-glass {
+  background: rgba(13, 11, 24, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Glass card (stronger blur, subtle border) */
+.vz-glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 12px 40px -8px rgba(112, 71, 245, 0.12);
+}
+.dark .vz-glass-card {
+  background: rgba(23, 20, 38, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.5);
+}
+
+/* Mesh gradient background (animated) */
+.vz-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--vz-bg);
+}
+.vz-mesh-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.45;
+  animation: vz-mesh-float 20s ease-in-out infinite;
+}
+.vz-mesh-blob-1 {
+  width: 600px;
+  height: 600px;
+  background: #7047f5;
+  top: -10%;
+  left: -10%;
+  animation-delay: 0s;
+}
+.vz-mesh-blob-2 {
+  width: 500px;
+  height: 500px;
+  background: #a855f7;
+  top: 20%;
+  right: -15%;
+  animation-delay: -5s;
+}
+.vz-mesh-blob-3 {
+  width: 400px;
+  height: 400px;
+  background: #8b5cf6;
+  bottom: -10%;
+  left: 20%;
+  animation-delay: -10s;
+}
+.dark .vz-mesh-blob-1 { background: #8b5cf6; opacity: 0.35; }
+.dark .vz-mesh-blob-2 { background: #a855f7; opacity: 0.3; }
+.dark .vz-mesh-blob-3 { background: #7047f5; opacity: 0.35; }
+
+@keyframes vz-mesh-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 40px) scale(0.95); }
+}
+
+/* Glow rings */
+.vz-glow-violet {
+  box-shadow: 0 0 40px -12px rgba(112, 71, 245, 0.45);
+}
+.vz-glow-fuchsia {
+  box-shadow: 0 0 40px -12px rgba(168, 85, 247, 0.45);
+}
+.vz-glow-inner {
+  position: relative;
+  overflow: hidden;
+}
+.vz-glow-inner::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(circle at 50% 50%, rgba(112, 71, 245, 0.25), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.vz-glow-inner:hover::before {
+  opacity: 1;
+}
+
+/* 3D-ready stage (perspective container) */
+.vz-stage-3d {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Tilt card (lightweight CSS 3D tilt, mobile-safe) */
+.vz-tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+/* Button glow on hover */
+.vz-btn-glow:hover {
+  box-shadow: 0 0 30px -8px rgba(112, 71, 245, 0.6);
+}
+
+/* Mobile-lighter: disable heavy effects on small screens / reduced motion */
+@media (max-width: 640px), (prefers-reduced-motion: reduce) {
+  .vz-mesh-blob {
+    display: none;
+  }
+  .vz-tilt {
+    transition: none;
+    transform: none !important;
+  }
+  .vz-glass-card {
+    backdrop-filter: blur(12px);
+    box-shadow: none;
+  }
+}
+
+/* Page enter / leave variants (used by framer-motion) */
+.vz-page-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.vz-page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.vz-page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.vz-page-exit-active {
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Stagger children */
+.vz-stagger > * {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.vz-stagger-appear > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
