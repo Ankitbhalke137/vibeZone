@@ -21,6 +21,9 @@ import {
 import { Brand } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
+import { HeroCanvas } from "@/components/3d/hero-canvas";
+import { MeshBackground } from "@/components/3d/mesh-background";
+import { cn } from "@/lib/utils";
 
 const FEATURES = [
   {
@@ -192,10 +195,10 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Product preview */}
-            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+            {/* Product preview — 3D canvas on desktop, glass cards on mobile */}
+            <div className="relative mx-auto w-full max-w-md lg:max-w-none lg:hidden">
               <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-br from-primary/20 via-transparent to-fuchsia-400/20 blur-2xl" />
-              <div className="vz-panel overflow-hidden p-0 shadow-2xl">
+              <div className="vz-panel-2 overflow-hidden p-0">
                 <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2.5">
                   <span className="size-2 rounded-full bg-danger/60" />
                   <span className="size-2 rounded-full bg-warning/60" />
@@ -267,6 +270,10 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
+
+            <div className="hidden lg:block">
+              <HeroCanvas />
+            </div>
           </div>
         </section>
 
@@ -303,11 +310,12 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURES.map((feature) => (
+            <div className="mt-10 vz-stagger-appear grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURES.map((feature, index) => (
                 <article
                   key={feature.title}
-                  className="vz-panel vz-card-hover p-4"
+                  className={cn("vz-glass-card vz-card-hover p-4", index % 2 === 0 && "vz-glow-inner")}
+                  style={{ transitionDelay: `${index * 60}ms` }}
                 >
                   <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
                     <feature.icon size={18} />
