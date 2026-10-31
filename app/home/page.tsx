@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   BellRing,
@@ -27,6 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "@/components/ui/page-header";
 import { Feed } from "@/components/feed/feed";
 import { PollWidget } from "@/components/home/poll-widget";
+import { CampusOrbit } from "@/components/3d/campus-orbit";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Home" };
@@ -114,84 +117,177 @@ export default async function HomePage() {
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-4">
-        {/* Hero */}
-        <section className="vz-hero relative isolate overflow-hidden rounded-2xl p-5 text-white sm:p-6">
-          <div className="vz-hero-glow pointer-events-none absolute inset-0" />
-          <div className="pointer-events-none absolute -right-10 -top-12 size-48 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-1/3 size-56 rounded-full bg-fuchsia-300/20 blur-3xl" />
+        {/* Hero — 3D campus orbit on desktop, glass gradient on mobile */}
+        <section className="relative isolate overflow-hidden rounded-2xl p-5 sm:p-6 vz-stage-3d">
+          <div className="absolute inset-0 z-0 rounded-2xl bg-[var(--vz-card-2)] border border-[var(--vz-border)]" />
+          <div className="relative z-10">
+            {/* Desktop: 3D orbit */}
+            <div className="hidden lg:block h-[200px] mb-6">
+              <CampusOrbit />
+            </div>
+            {/* Mobile: gradient hero */}
+            <div className="lg:hidden vz-hero relative overflow-hidden rounded-2xl p-4 text-white">
+              <div className="vz-hero-glow pointer-events-none absolute inset-0" />
+              <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-white/10 blur-3xl" />
+              <div className="relative">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium text-white/75">
+                      {greeting()}, {firstName} 👋
+                    </p>
+                    <h1 className="mt-1 max-w-lg text-[24px] font-black leading-tight tracking-tight sm:text-30px">
+                      Your campus, <span className="text-white/90">all in one place.</span>
+                    </h1>
+                    <p className="mt-1.5 max-w-md text-[12px] leading-relaxed text-white/75">
+                      Catch up on what matters, share something with campus, and keep your streak alive.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold backdrop-blur">
+                    {today}
+                  </span>
+                </div>
 
-          <div className="relative">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium text-white/75">
-                  {greeting()}, {firstName} 👋
-                </p>
-                <h1 className="mt-1 max-w-lg text-[26px] font-black leading-tight tracking-tight sm:text-[30px]">
-                  Your campus, <span className="text-white/90">all in one place.</span>
-                </h1>
-                <p className="mt-1.5 max-w-md text-[12px] leading-relaxed text-white/75">
-                  Catch up on what matters, share something with campus, and keep your streak alive.
-                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Link
+                    href="/create"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-white px-4 text-xs font-bold text-primary transition hover:bg-white/90"
+                  >
+                    <Sparkles size={13} /> Share something
+                  </Link>
+                  <Link
+                    href="/explore"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-white/15 px-4 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/25"
+                  >
+                    Explore campus <ArrowRight size={13} />
+                  </Link>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <motion.div
+                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <HeroStat icon={Sparkles} label="Level" value={`${data.stats.level}`} hint={data.stats.levelName} />
+                  </motion.div>
+                  <motion.div
+                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    <HeroStat icon={Trophy} label="Points" value={data.stats.xp.toLocaleString("en-IN")} hint={`${data.stats.xpToNext} to next`} />
+                  </motion.div>
+                  <motion.div
+                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                  >
+                    <HeroStat icon={Trophy} label="Rank" value={data.stats.rank ? `#${data.stats.rank}` : "—"} hint="This week" />
+                  </motion.div>
+                  <motion.div
+                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    transition={{ duration: 0.4, delay: 0.3 }}
+                  >
+                    <HeroStat icon={Flame} label="Streak" value={`${data.stats.streak}d`} hint={data.stats.streak > 0 ? "Keep it going" : "Start today"} />
+                  </motion.div>
+                </div>
+
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-[9px] font-medium text-white/70">
+                    <span>Level {data.stats.level}</span>
+                    <span>{Math.round(data.stats.levelProgress * 100)}%</span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/20">
+                    <div
+                      className="h-full rounded-full bg-white/90 transition-all"
+                      style={{ width: `${Math.max(4, Math.min(100, data.stats.levelProgress * 100))}%` }}
+                    />
+                  </div>
+                </div>
               </div>
-              <span className="hidden rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold backdrop-blur sm:block">
-                {today}
-              </span>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Link
-                href="/create"
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-white px-4 text-xs font-bold text-primary transition hover:bg-white/90"
-              >
-                <Sparkles size={13} /> Share something
-              </Link>
-              <Link
-                href="/explore"
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-white/15 px-4 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/25"
-              >
-                Explore campus <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <HeroStat icon={Sparkles} label="Level" value={`${data.stats.level}`} hint={data.stats.levelName} />
-              <HeroStat icon={Trophy} label="Points" value={data.stats.xp.toLocaleString("en-IN")} hint={`${data.stats.xpToNext} to next`} />
-              <HeroStat icon={Trophy} label="Rank" value={data.stats.rank ? `#${data.stats.rank}` : "—"} hint="This week" />
-              <HeroStat icon={Flame} label="Streak" value={`${data.stats.streak}d`} hint={data.stats.streak > 0 ? "Keep it going" : "Start today"} />
-            </div>
-
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-[9px] font-medium text-white/70">
-                <span>Level {data.stats.level}</span>
-                <span>{Math.round(data.stats.levelProgress * 100)}%</span>
+            {/* Desktop content (text + actions + stats) */}
+            <div className="lg:block mt-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium text-primary">
+                    {greeting()}, {firstName} 👋
+                  </p>
+                  <h1 className="mt-1 max-w-lg text-[26px] font-black leading-tight tracking-tight sm:text-30px">
+                    Your campus, <span className="vz-gradient-text">all in one place.</span>
+                  </h1>
+                  <p className="mt-1.5 max-w-md text-[12px] leading-relaxed text-muted">
+                    Catch up on what matters, share something with campus, and keep your streak alive.
+                  </p>
+                </div>
+                <span className="hidden lg:inline-flex rounded-full bg-accent px-3 py-1 text-[10px] font-semibold text-muted border border-border">
+                  {today}
+                </span>
               </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/20">
-                <div
-                  className="h-full rounded-full bg-white/90 transition-all"
-                  style={{ width: `${Math.max(4, Math.min(100, data.stats.levelProgress * 100))}%` }}
-                />
+
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <Link
+                  href="/create"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl vz-btn-glow bg-primary px-4 text-xs font-bold text-white shadow-lg shadow-primary/30 transition hover:bg-white/90"
+                >
+                  <Sparkles size={13} /> Share something
+                </Link>
+                <Link
+                  href="/explore"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted transition hover:bg-accent hover:text-foreground"
+                >
+                  Explore campus <ArrowRight size={13} />
+                </Link>
+              </div>
+
+              <div className="mt-6 vz-stagger-appear grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <HeroStat icon={Sparkles} label="Level" value={`${data.stats.level}`} hint={data.stats.levelName} />
+                <HeroStat icon={Trophy} label="Points" value={data.stats.xp.toLocaleString("en-IN")} hint={`${data.stats.xpToNext} to next`} />
+                <HeroStat icon={Trophy} label="Rank" value={data.stats.rank ? `#${data.stats.rank}` : "—"} hint="This week" />
+                <HeroStat icon={Flame} label="Streak" value={`${data.stats.streak}d`} hint={data.stats.streak > 0 ? "Keep it going" : "Start today"} />
+              </div>
+
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-[9px] font-medium text-muted">
+                  <span>Level {data.stats.level}</span>
+                  <span>{Math.round(data.stats.levelProgress * 100)}%</span>
+                </div>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-accent">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.max(4, Math.min(100, data.stats.levelProgress * 100))}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Quick access */}
-        <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {quick.map((item) => (
-            <Link
+        {/* Quick access — glass cards with stagger */}
+        <section className="vz-stagger-appear grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {quick.map((item, index) => (
+            <motion.div
               key={item.href}
-              href={item.href}
-              className="vz-panel vz-card-hover group flex items-center gap-2.5 p-2.5"
+              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
             >
-              <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${item.chip}`}>
-                <item.icon size={16} />
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-[11px] font-bold">{item.label}</span>
-                <span className="block truncate text-[10px] text-muted">{item.detail}</span>
-              </span>
-              <ChevronRight size={13} className="ml-auto hidden shrink-0 text-muted-2 transition group-hover:text-primary sm:block" />
-            </Link>
+              <Link
+                href={item.href}
+                className="vz-glass-card vz-card-hover group flex items-center gap-2.5 p-2.5"
+              >
+                <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${item.chip} vz-glow-inner`}>
+                  <item.icon size={16} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-[11px] font-bold">{item.label}</span>
+                  <span className="block truncate text-[10px] text-muted">{item.detail}</span>
+                </span>
+                <ChevronRight size={13} className="ml-auto hidden shrink-0 text-muted-2 transition group-hover:text-primary sm:block" />
+              </Link>
+            </motion.div>
           ))}
         </section>
 
@@ -215,51 +311,62 @@ export default async function HomePage() {
       {/* Right rail */}
       <aside className="flex min-w-0 flex-col gap-3">
         {people.length > 0 ? (
-          <section className="vz-panel p-4">
-            <SectionHeader
-              title="Campus people"
-              action={
-                <Link href="/explore" className="text-[10px] font-semibold text-primary hover:underline">
-                  See all
-                </Link>
-              }
-            />
-            <ul className="mt-3 flex flex-col gap-2.5">
-              {people.map((person) => (
-                <li key={person.id}>
-                  <Link href={`/u/${person.handle}`} className="group flex items-center gap-2.5">
-                    <Avatar name={person.name} handle={person.handle} avatarUrl={person.avatarUrl} size="sm" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[11px] font-semibold group-hover:text-primary">
-                        {person.name}
-                      </span>
-                      <span className="block truncate text-[10px] text-muted">
-                        @{person.handle}
-                        {person.branch ? ` · ${person.branch}` : ""}
-                        {person.year ? ` Y${person.year}` : ""}
-                      </span>
-                    </span>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary">
-                      View
-                    </span>
+          <motion.div
+            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.4 }}
+          >
+            <section className="vz-glass-card p-4">
+              <SectionHeader
+                title="Campus people"
+                action={
+                  <Link href="/explore" className="text-[10px] font-semibold text-primary hover:underline">
+                    See all
                   </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
+                }
+              />
+              <ul className="mt-3 flex flex-col gap-2.5">
+                {people.map((person) => (
+                  <li key={person.id}>
+                    <Link href={`/u/${person.handle}`} className="group flex items-center gap-2.5">
+                      <Avatar name={person.name} handle={person.handle} avatarUrl={person.avatarUrl} size="sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[11px] font-semibold group-hover:text-primary">
+                          {person.name}
+                        </span>
+                        <span className="block truncate text-[10px] text-muted">
+                          @{person.handle}
+                          {person.branch ? ` · ${person.branch}` : ""}
+                          {person.year ? ` Y${person.year}` : ""}
+                        </span>
+                      </span>
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary">
+                        View
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </motion.div>
         ) : null}
 
         {/* Announcements */}
-        <section className="vz-panel p-4">
-          <SectionHeader
-            title="Announcements"
-            icon={<BellRing size={14} />}
-            action={
-              <Link href="/announcements" className="text-[10px] font-semibold text-primary hover:underline">
-                All
-              </Link>
-            }
-          />
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <section className="vz-glass-card p-4">
+            <SectionHeader
+              title="Announcements"
+              icon={<BellRing size={14} />}
+              action={
+                <Link href="/announcements" className="text-[10px] font-semibold text-primary hover:underline">
+                  All
+                </Link>
+              }
+            />
           {data.announcements.length === 0 ? (
             <p className="mt-3 text-[11px] leading-relaxed text-muted">
               No live announcements. Official updates will appear here.
@@ -284,10 +391,16 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-        </section>
+          </section>
+        </motion.div>
 
         {/* Events */}
-        <section className="vz-panel p-4">
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+        >
+          <section className="vz-glass-card p-4">
           <SectionHeader
             title="Upcoming events"
             icon={<CalendarDays size={14} />}
@@ -327,21 +440,27 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-        </section>
+          </section>
+        </motion.div>
 
         <PollWidget poll={data.poll} />
 
         {/* Notes */}
-        <section className="vz-panel p-4">
-          <SectionHeader
-            title="Notes & resources"
-            icon={<BookOpen size={14} />}
-            action={
-              <Link href="/notes" className="text-[10px] font-semibold text-primary hover:underline">
-                Browse
-              </Link>
-            }
-          />
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <section className="vz-glass-card p-4">
+            <SectionHeader
+              title="Notes & resources"
+              icon={<BookOpen size={14} />}
+              action={
+                <Link href="/notes" className="text-[10px] font-semibold text-primary hover:underline">
+                  Browse
+                </Link>
+              }
+            />
           {data.notes.length === 0 ? (
             <p className="mt-3 text-[11px] leading-relaxed text-muted">
               No notes yet. Share the first resource from the notes page.
@@ -370,19 +489,25 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-        </section>
+          </section>
+        </motion.div>
 
         {/* Lost & found */}
-        <section className="vz-panel p-4">
-          <SectionHeader
-            title="Lost & found"
-            icon={<PackageSearch size={14} />}
-            action={
-              <Link href="/lost-and-found" className="text-[10px] font-semibold text-primary hover:underline">
-                Open
-              </Link>
-            }
-          />
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+        >
+          <section className="vz-glass-card p-4">
+            <SectionHeader
+              title="Lost & found"
+              icon={<PackageSearch size={14} />}
+              action={
+                <Link href="/lost-and-found" className="text-[10px] font-semibold text-primary hover:underline">
+                  Open
+                </Link>
+              }
+            />
           {data.lostFound.length === 0 ? (
             <p className="mt-3 text-[11px] leading-relaxed text-muted">
               No open items. Lost something? Post it and campus will help look.
@@ -412,19 +537,25 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-        </section>
+          </section>
+        </motion.div>
 
         {/* Mentors */}
-        <section className="vz-panel p-4">
-          <SectionHeader
-            title="Seniors Connect"
-            icon={<GraduationCap size={14} />}
-            action={
-              <Link href="/mentorship" className="text-[10px] font-semibold text-primary hover:underline">
-                Find a mentor
-              </Link>
-            }
-          />
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <section className="vz-glass-card p-4">
+            <SectionHeader
+              title="Seniors Connect"
+              icon={<GraduationCap size={14} />}
+              action={
+                <Link href="/mentorship" className="text-[10px] font-semibold text-primary hover:underline">
+                  Find a mentor
+                </Link>
+              }
+            />
           {data.seniors.length === 0 ? (
             <p className="mt-3 text-[11px] leading-relaxed text-muted">
               No seniors have set up mentoring yet. Check back as the community grows.
@@ -455,19 +586,25 @@ export default async function HomePage() {
               ))}
             </ul>
           )}
-        </section>
+          </section>
+        </motion.div>
 
         {/* Chat */}
-        <section className="vz-panel p-4">
-          <SectionHeader
-            title="Campus chat"
-            icon={<Hash size={14} />}
-            action={
-              <Link href="/chat" className="text-[10px] font-semibold text-primary hover:underline">
-                Open
-              </Link>
-            }
-          />
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+        >
+          <section className="vz-glass-card p-4">
+            <SectionHeader
+              title="Campus chat"
+              icon={<Hash size={14} />}
+              action={
+                <Link href="/chat" className="text-[10px] font-semibold text-primary hover:underline">
+                  Open
+                </Link>
+              }
+            />
           {data.channels.length === 0 ? (
             <p className="mt-3 text-[11px] leading-relaxed text-muted">
               Channels will appear here once they&apos;re created.
@@ -502,22 +639,29 @@ export default async function HomePage() {
               ))}
             </div>
           )}
-        </section>
+          </section>
+        </motion.div>
 
-        <section className="vz-panel vz-soft-gradient p-4">
-          <div className="flex items-center gap-2 text-[11px] font-bold">
-            <Vote size={13} className="text-primary" /> Earn campus points
-          </div>
-          <p className="mt-1.5 text-[10.5px] leading-relaxed text-muted">
-            Post, comment, vote, RSVP and share notes to climb the weekly leaderboard.
-          </p>
-          <Link
-            href="/leaderboard"
-            className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
-          >
-            View leaderboard <ArrowRight size={10} />
-          </Link>
-        </section>
+        <motion.div
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
+          <section className="vz-glass-card vz-soft-gradient p-4">
+            <div className="flex items-center gap-2 text-[11px] font-bold">
+              <Vote size={13} className="text-primary" /> Earn campus points
+            </div>
+            <p className="mt-1.5 text-[10.5px] leading-relaxed text-muted">
+              Post, comment, vote, RSVP and share notes to climb the weekly leaderboard.
+            </p>
+            <Link
+              href="/leaderboard"
+              className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+            >
+              View leaderboard <ArrowRight size={10} />
+            </Link>
+          </section>
+        </motion.div>
       </aside>
     </div>
   );
@@ -535,12 +679,12 @@ function HeroStat({
   hint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/15 bg-white/10 px-2.5 py-2 backdrop-blur-sm">
-      <p className="flex items-center gap-1 text-[9px] font-medium uppercase tracking-wide text-white/65">
+    <div className="vz-glass-card rounded-xl p-2.5 vz-glow-inner">
+      <p className="flex items-center gap-1 text-[9px] font-medium uppercase tracking-wide text-primary">
         <Icon size={10} /> {label}
       </p>
       <p className="mt-0.5 text-base font-black leading-none">{value}</p>
-      <p className="mt-0.5 truncate text-[8.5px] text-white/60">{hint}</p>
+      <p className="mt-0.5 truncate text-[8.5px] text-muted">{hint}</p>
     </div>
   );
 }
