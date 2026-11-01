@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { z } from "zod";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const Body = z.object({});
 
 export async function POST(
   req: Request,
@@ -19,11 +16,10 @@ export async function POST(
     }
 
     const { id } = await params;
-    await Body.parse(await req.json());
 
-    await db.bookmark.upsert({
-      where: { noteId_userId: { noteId: id, userId: user.id } },
-      create: { noteId: id, userId: user.id },
+    await db.postBookmark.upsert({
+      where: { postId_userId: { postId: id, userId: user.id } },
+      create: { postId: id, userId: user.id },
       update: {},
     });
 
