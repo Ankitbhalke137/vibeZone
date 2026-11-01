@@ -7,6 +7,7 @@
    VibeZone design tokens
    Light lavender is the default. The dark theme is designed
    separately rather than inverted.
+   Primary purple: #7c5cff, Secondary: #a855f7, Accent: #d946ef
    ============================================================ */
 :root {
   --vz-bg: #f7f6ff;
@@ -19,16 +20,16 @@
   --vz-text: #17152b;
   --vz-muted: #77758b;
   --vz-muted-2: #9b98ab;
-  --vz-violet: #7047f5;
+  --vz-violet: #7c5cff;
   --vz-violet-2: #8b5cf6;
-  --vz-magenta: #a855f7;
+  --vz-magenta: #d946ef;
   --vz-green: #22c55e;
   --vz-amber: #f59e0b;
   --vz-red: #ef4444;
   --vz-cyan: #0891b2;
-  --vz-ring: rgba(112, 71, 245, 0.18);
+  --vz-ring: rgba(124, 92, 255, 0.18);
   --vz-shadow: 0 10px 30px -18px rgba(23, 21, 43, 0.22);
-  --vz-shadow-lg: 0 24px 60px -30px rgba(112, 71, 245, 0.5);
+  --vz-shadow-lg: 0 24px 60px -30px rgba(124, 92, 255, 0.5);
   color-scheme: light;
 }
 
@@ -43,14 +44,14 @@
   --vz-text: #f8f7ff;
   --vz-muted: #aaa5be;
   --vz-muted-2: #7e7894;
-  --vz-violet: #8b5cf6;
-  --vz-violet-2: #c084fc;
+  --vz-violet: #7c5cff;
+  --vz-violet-2: #a855f7;
   --vz-magenta: #d946ef;
   --vz-green: #4ade80;
   --vz-amber: #fbbf24;
   --vz-red: #f87171;
   --vz-cyan: #22d3ee;
-  --vz-ring: rgba(139, 92, 246, 0.25);
+  --vz-ring: rgba(124, 92, 255, 0.25);
   --vz-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.6);
   --vz-shadow-lg: 0 24px 60px -30px rgba(0, 0, 0, 0.75);
   color-scheme: dark;
