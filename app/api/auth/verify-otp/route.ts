@@ -4,9 +4,8 @@ import { db } from "@/lib/db";
 import { env, isCampusEmail } from "@/lib/env";
 import { verifyOtp } from "@/lib/otp";
 import { setSessionCookie } from "@/lib/session";
-import { autoHandle, nameFromEmail } from "@/lib/utils";
+import { autoHandle, nameFromEmail, clientIp } from "@/lib/utils";
 import { hit } from "@/lib/rate-limit";
-import { clientIp } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +16,10 @@ const Body = z.object({
 });
 
 export async function POST(req: Request) {
-  if (!hit(`otpv-ip:${clientIp(req.headers)}`, 20, 600_000)) {
+  const ip = clientIp(req.headers);
+
+  // Rate limit per IP
+  if (!hit(`otpv-ip:${ip}`, 20, 600_000)) {
     return NextResponse.json({ error: "Too many attempts — wait a few minutes." }, { status: 429 });
   }
 
@@ -33,6 +35,13 @@ export async function POST(req: Request) {
 
   const check = await verifyOtp(email, code);
   if (!check.ok) {
+    // Log suspicious login attempt (multiple failures from same IP)
+    if (check.status === 401) {
+      const failCount = hit(`otp-fail-${ip}`, 5, 600_000) ? 1 : 6;
+      if (failCount >= 5) {
+        console.error(`[SECURITY] Suspicious login attempts from IP ${ip} for email ${email}`);
+      }
+    }
     return NextResponse.json({ error: check.error }, { status: check.status });
   }
 
@@ -41,7 +50,7 @@ export async function POST(req: Request) {
   let isNew = false;
   if (!user) {
     isNew = true;
-    const isAdmin = env.superAdminEmails.includes(email); // D10
+    const isAdmin = env.superAdminEmails.includes(email);
     user = await db.user.create({
       data: {
         email,
