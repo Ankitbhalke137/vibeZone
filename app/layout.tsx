@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
+    apple: "/icon-192.png",
   },
 };
 
@@ -42,6 +43,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/icon.svg" />
+        <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
+        <link rel="icon" href="/icon-512.png" sizes="512x512" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icon-512.png" sizes="512x512" />
+        <link rel="mask-icon" href="/icon.svg" color="#7c5cff" />
+      </head>
       <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
         <ThemeProvider>
           <ToastProvider>
