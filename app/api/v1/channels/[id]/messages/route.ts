@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
+import { serializeMessage } from "@/lib/chat";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,14 +26,18 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "50", 10);
 
-    const messages = await db.message.findMany({
+    const rows = await db.message.findMany({
       where: { channelId: id, deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: limit,
-      include: { sender: { select: { id: true, name: true, handle: true, avatarUrl: true } } },
+      include: {
+        sender: { select: { id: true, name: true, handle: true, avatarUrl: true } },
+      },
     });
 
-    return NextResponse.json({ messages: messages.reverse() });
+    const messages = rows.reverse().map((m) => serializeMessage(m));
+
+    return NextResponse.json({ messages });
   } catch (e) {
     return NextResponse.json({ error: "Failed to load messages" }, { status: 500 });
   }
@@ -61,7 +66,9 @@ export async function POST(
       include: { sender: { select: { id: true, name: true, handle: true, avatarUrl: true } } },
     });
 
-    return NextResponse.json({ message }, { status: 201 });
+    const dto = serializeMessage(message);
+
+    return NextResponse.json({ message: dto }, { status: 201 });
   } catch (e) {
     return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
   }
