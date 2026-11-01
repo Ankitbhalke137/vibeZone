@@ -28,8 +28,7 @@ export async function POST(
       return NextResponse.json({ error: "Poll not found or closed" }, { status: 404 });
     }
 
-    const closesAt = new Date(poll.closesAt);
-    if (closesAt <= new Date()) {
+    if (!poll.closesAt || new Date(poll.closesAt) <= new Date()) {
       return NextResponse.json({ error: "Poll is closed" }, { status: 400 });
     }
 

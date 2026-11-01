@@ -69,8 +69,8 @@ export async function GET(req: Request) {
       },
     });
 
-    const hasMore = rows.length > (parsed.data.take ?? 10);
-    const page = hasMore ? rows.slice(0, parsed.data.take ?? 10) : rows;
+    const hasMore = data.length > (parsed.data.take ?? 10);
+    const page = hasMore ? data.slice(0, parsed.data.take ?? 10) : data;
 
     return NextResponse.json({
       posts: page.map((row) => ({

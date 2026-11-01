@@ -56,7 +56,7 @@ export async function POST(
         channelId: id,
         senderId: user.id,
         body: body.body,
-        alias: body.alias || false,
+        aliasName: body.alias ? user.name : null,
       },
       include: { sender: { select: { id: true, name: true, handle: true, avatarUrl: true } } },
     });

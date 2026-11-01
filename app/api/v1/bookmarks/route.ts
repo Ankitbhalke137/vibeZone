@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const bookmarks = await db.bookmark.findMany({
+    const bookmarks = await db.postBookmark.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 50,
@@ -29,5 +29,26 @@ export async function GET() {
     return NextResponse.json({ bookmarks });
   } catch (e) {
     return NextResponse.json({ error: "Failed to load bookmarks" }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const { id } = await req.json();
+
+    await db.postBookmark.upsert({
+      where: { postId_userId: { postId: id, userId: user.id } },
+      create: { postId: id, userId: user.id },
+      update: {},
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: "Failed to bookmark" }, { status: 500 });
   }
 }

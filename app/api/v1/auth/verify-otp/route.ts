@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { getCurrentUser, requireUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { getSession, slideSession } from "@/lib/session";
 import { verifyOtp, issueOtp, OTP_TTL_MIN } from "@/lib/otp";
 import { apiError } from "@/lib/api";
@@ -27,17 +27,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
-    const user = await db.user.update({
-      where: { email },
-      data: { emailVerifiedAt: new Date() },
-    });
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
     const session = await getSession();
     if (session) await slideSession(session);
 
     return NextResponse.json({
       ok: true,
-      user: { id: user.id, handle: user.handle, name: user.name, email: user.email },
+      user: {
+        id: user.id,
+        handle: user.handle,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (e) {
     return apiError(e);
