@@ -1,8 +1,9 @@
 /** Client-safe date helpers. */
 
-export function timeAgo(input: string | Date): string {
+export function timeAgo(input: string | Date, referenceNow?: Date): string {
   const date = typeof input === "string" ? new Date(input) : input;
-  const diff = Date.now() - date.getTime();
+  const now = referenceNow ?? new Date();
+  const diff = now.getTime() - date.getTime();
   const min = Math.floor(diff / 60_000);
   if (!Number.isFinite(min)) return "";
   if (min < 1) return "just now";

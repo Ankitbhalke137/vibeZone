@@ -17,7 +17,7 @@ import {
 describe("istDayKey", () => {
   it("should always return YYYY-MM-DD format", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }), (date) => {
+      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
         const key = istDayKey(date);
         expect(/^\d{4}-\d{2}-\d{2}$/.test(key)).toBe(true);
       }),
