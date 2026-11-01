@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { ToastProvider } from "@/components/ui/toast";
 import { PageTransition } from "@/components/ui/page-transition";
 import { MeshBackground } from "@/components/3d/mesh-background";
+import { InstallPrompt } from "@/components/ui/install-prompt";
 import { gaInitSnippet } from "@/lib/ga";
 import "./globals.css";
 
@@ -47,8 +48,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PageTransition>
               <AppShell>{children}</AppShell>
             </PageTransition>
+            <InstallPrompt />
           </ToastProvider>
         </ThemeProvider>
+        <Script
+          id="sw-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js').then((reg) => {
+                    console.log('Service Worker registered:', reg.scope);
+                  }).catch((err) => {
+                    console.log('Service Worker registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
         {GA_ID ? (
           <>
             <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
