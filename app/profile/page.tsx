@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -23,6 +24,11 @@ import { SectionHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Profile" };
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -59,14 +65,14 @@ export default async function ProfilePage() {
           <div className="flex items-center gap-1.5">
             <a
               href="#account"
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-2.5 text-[10px] font-semibold text-muted shadow-sm transition hover:text-foreground"
+              className="inline-flex h-8 items-center gap-1 rounded-lg vz-glow-inner border border-border bg-card px-2.5 text-[10px] font-semibold text-muted shadow-sm transition hover:text-foreground"
             >
               <Pencil size={11} /> Edit
             </a>
             <Link
               href="/settings"
               aria-label="Settings"
-              className="grid size-8 place-items-center rounded-lg border border-border bg-card text-muted shadow-sm transition hover:text-foreground"
+              className="grid size-8 place-items-center rounded-lg vz-glow-inner border border-border bg-card text-muted shadow-sm transition hover:text-foreground"
             >
               <Settings size={13} />
             </Link>
@@ -82,7 +88,11 @@ export default async function ProfilePage() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col gap-3">
-          <section className="flex flex-col gap-3">
+          <motion.div
+            initial={cardVariants.hidden}
+            animate={cardVariants.visible}
+            className="flex flex-col gap-3"
+          >
             <div className="flex items-center justify-between gap-2">
               <SectionHeader
                 title="Your posts"
@@ -104,11 +114,16 @@ export default async function ProfilePage() {
               emptyTitle="Your feed is waiting"
               emptyDescription="Share an update, a question or a win. Your posts will collect here."
             />
-          </section>
+          </motion.div>
         </div>
 
         <aside id="account" className="flex min-w-0 flex-col gap-3 scroll-mt-20">
-          <section className="vz-panel p-4">
+          <motion.div
+            initial={cardVariants.hidden}
+            animate={cardVariants.visible}
+            transition={{ delay: 0.1 }}
+            className="vz-glass-card p-4"
+          >
             <SectionHeader
               title="Account details"
               description="Only visible to you"
@@ -140,9 +155,14 @@ export default async function ProfilePage() {
                 <dd className="font-semibold">{messages.toLocaleString("en-IN")}</dd>
               </div>
             </dl>
-          </section>
+          </motion.div>
 
-          <section className="vz-panel p-4">
+          <motion.div
+            initial={cardVariants.hidden}
+            animate={cardVariants.visible}
+            transition={{ delay: 0.2 }}
+            className="vz-glass-card p-4"
+          >
             <SectionHeader title="Edit profile" description="Name, handle, bio and avatar" />
             <div className="mt-3">
               <ProfileEditor
@@ -158,9 +178,14 @@ export default async function ProfilePage() {
                 }}
               />
             </div>
-          </section>
+          </motion.div>
 
-          <section className="vz-panel p-4">
+          <motion.div
+            initial={cardVariants.hidden}
+            animate={cardVariants.visible}
+            transition={{ delay: 0.3 }}
+            className="vz-glass-card p-4"
+          >
             <div className="flex items-center gap-2 text-[10.5px] font-bold">
               <MessageSquare size={12} className="text-primary" /> Sessions
             </div>
@@ -174,7 +199,7 @@ export default async function ProfilePage() {
                 <SignOutEverywhereButton />
               </div>
             </div>
-          </section>
+          </motion.div>
         </aside>
       </div>
     </div>
