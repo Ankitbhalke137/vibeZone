@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Hash, LockKeyhole, MessagesSquare, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Hash,
+  LockKeyhole,
+  MessagesSquare,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { ensureGlobalMembership } from "@/lib/chat";
 import { formatIST, formatISTTime } from "@/lib/time";
 import { PageHeader, SectionHeader } from "@/components/ui/page-header";
 import { ChatDirectory, type ChatListItem } from "@/components/chat/chat-directory";
+import { CampusOrbit } from "@/components/3d/campus-orbit";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Chat" };
@@ -109,19 +119,57 @@ export default async function ChatPage() {
         }
       />
 
+      {/* Hero with 3D campus orbit (desktop) */}
+      <div className="lg:block h-[200px] mb-4">
+        <CampusOrbit />
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
         <div className="flex min-w-0 flex-col gap-3">
-          <section className="grid grid-cols-3 gap-2.5">
-            <Summary icon={Hash} label="Channels" value={channelCount} tone="bg-primary/10 text-primary" />
-            <Summary icon={LockKeyhole} label="Direct" value={dmCount} tone="bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400" />
-            <Summary icon={MessagesSquare} label="Unread" value={totalUnread} tone="bg-cyan-500/10 text-cyan-700 dark:text-cyan-400" />
+          <section className="grid gap-2.5 sm:grid-cols-3">
+            <motion.div
+              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Summary
+                icon={Hash}
+                label="Channels"
+                value={channelCount}
+                tone="bg-primary/10 text-primary"
+              />
+            </motion.div>
+            <motion.div
+              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <Summary
+                icon={LockKeyhole}
+                label="Direct"
+                value={dmCount}
+                tone="bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400"
+              />
+            </motion.div>
+            <motion.div
+              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <Summary
+                icon={MessagesSquare}
+                label="Unread"
+                value={totalUnread}
+                tone="bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
+              />
+            </motion.div>
           </section>
 
           <ChatDirectory items={items} />
         </div>
 
         <aside className="flex min-w-0 flex-col gap-3">
-          <section className="vz-panel vz-soft-gradient p-4">
+          <section className="vz-glass-card p-4">
             <SectionHeader
               title="Start a conversation"
               description="Find a classmate or senior"
@@ -147,7 +195,7 @@ export default async function ChatPage() {
             </div>
           </section>
 
-          <section className="vz-panel p-4">
+          <section className="vz-glass-card p-4">
             <SectionHeader title="Alias mode" description="Speak without the spotlight" icon={<Sparkles size={14} />} />
             <p className="mt-2 text-[10.5px] leading-relaxed text-muted">
               Global channels let you post under a temporary alias. Your identity stays private from
@@ -159,7 +207,7 @@ export default async function ChatPage() {
             </p>
           </section>
 
-          <section className="vz-panel p-4">
+          <section className="vz-glass-card p-4">
             <SectionHeader title="Keep it kind" icon={<ShieldCheck size={14} />} />
             <ul className="mt-2 flex flex-col gap-2 text-[10.5px] leading-relaxed text-muted">
               <li>No harassment, hate speech or doxxing.</li>
@@ -191,7 +239,7 @@ function Summary({
   tone: string;
 }) {
   return (
-    <div className="vz-panel flex items-center gap-2.5 p-3">
+    <div className="vz-glass-card vz-glow-inner flex items-center gap-2.5 p-3">
       <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${tone}`}>
         <Icon size={15} />
       </span>

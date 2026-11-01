@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Hash, Lock, MessagesSquare, Search, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Hash,
+  Lock,
+  MessagesSquare,
+  Search,
+  Users,
+} from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { Tabs } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +30,11 @@ export type ChatListItem = {
     handle: string;
     avatarUrl: string | null;
   } | null;
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
 };
 
 export function ChatDirectory({ items }: { items: ChatListItem[] }) {
@@ -46,7 +58,7 @@ export function ChatDirectory({ items }: { items: ChatListItem[] }) {
   }, [items, query, tab]);
 
   return (
-    <div className="vz-panel overflow-hidden">
+    <div className="vz-glass-card overflow-hidden">
       <div className="flex flex-col gap-2.5 border-b border-border p-3 sm:flex-row sm:items-center">
         <div className="relative min-w-0 flex-1 sm:max-w-xs">
           <Search
@@ -75,8 +87,12 @@ export function ChatDirectory({ items }: { items: ChatListItem[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center px-6 py-14 text-center">
-          <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <motion.div
+          initial={listItemVariants.hidden}
+          animate={listItemVariants.visible}
+          className="flex flex-col items-center px-6 py-14 text-center"
+        >
+          <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary mb-3">
             <MessagesSquare size={21} />
           </span>
           <h3 className="mt-3 text-sm font-bold">
@@ -87,19 +103,31 @@ export function ChatDirectory({ items }: { items: ChatListItem[] }) {
               ? "Try a shorter search or switch filters."
               : "Join a campus channel, or open a classmate's profile to start a direct message."}
           </p>
-        </div>
+        </motion.div>
       ) : (
-        <ul className="divide-y divide-border">
-          {visible.map((item) => {
+        <motion.ul
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="divide-y divide-border"
+        >
+          {visible.map((item, index) => {
             const isChannel = item.type === "global";
             return (
-              <li key={item.id}>
+              <motion.li
+                key={item.id}
+                variants={listItemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: index * 0.03 }}
+                className="group"
+              >
                 <Link
                   href={`/chat/${item.slug}`}
-                  className="group flex items-center gap-3 px-4 py-3 transition hover:bg-accent/40"
+                  className="group flex items-center gap-3 px-4 py-3.5 transition hover:bg-accent/50 vz-glow-inner"
                 >
                   {isChannel ? (
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary vz-stage-3d vz-tilt">
                       <Hash size={17} />
                     </span>
                   ) : item.other ? (
@@ -109,10 +137,12 @@ export function ChatDirectory({ items }: { items: ChatListItem[] }) {
                         handle={item.other.handle}
                         avatarUrl={item.other.avatarUrl}
                         size="md"
+                        className="z-10 relative"
                       />
-                      <span className="absolute -bottom-0.5 -right-0.5 grid size-4 place-items-center rounded-full border border-card bg-card text-muted">
+                      <span className="absolute -bottom-0.5 -right-0.5 grid size-4 place-items-center rounded-full border border-card bg-card text-muted z-20">
                         <Lock size={8} />
                       </span>
+                      <span className="absolute -inset-0.5 rounded-full opacity-60 pointer-events-none bg-gradient-to-tr from-[var(--vz-violet)] via-[var(--vz-magenta)] to-[var(--vz-violet)] animate-[spin_3s_linear_infinite]" />
                     </span>
                   ) : (
                     <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-primary">
@@ -165,10 +195,10 @@ export function ChatDirectory({ items }: { items: ChatListItem[] }) {
                     )}
                   </div>
                 </Link>
-              </li>
+              </motion.li>
             );
           })}
-        </ul>
+        </motion.ul>
       )}
     </div>
   );
