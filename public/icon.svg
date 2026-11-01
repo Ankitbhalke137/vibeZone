@@ -1,10 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="VibeZone">
   <defs>
-    <linearGradient id="vz" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7c5cff" />
-      <stop offset="1" stop-color="#d946ef" />
+    <linearGradient id="vz-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c5cff" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#d946ef" />
     </linearGradient>
+    <linearGradient id="vz-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0e7ff" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="116" fill="url(#vz)" />
-  <path d="M132 138h70l54 176 54-176h70L302 374h-92z" fill="#ffffff" />
+
+  <!-- Campus tower building icon -->
+  <g transform="translate(60, 140)">
+    <!-- Tower base -->
+    <path d="M60 180h120v160H60z" fill="#2d1b69" />
+    <!-- Tower roof -->
+    <path d="M60 180L120 100L180 180Z" fill="#4a3a8c" />
+    <!-- Clock face -->
+    <circle cx="120" cy="140" r="14" fill="#ffffff" />
+    <path d="M120 126L120 114M120 154L120 166M106 140L94 140M134 140L146 140" stroke="#7c5cff" stroke-width="2" stroke-linecap="round" />
+    <!-- Flag -->
+    <path d="M180 100L180 130L200 130L200 100Z" fill="#f59e0b" />
+  </g>
+
+  <!-- Main V mark -->
+  <path d="M60 320L140 140L220 320" fill="none" stroke="url(#vz-gradient)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Orbital ring -->
+  <path d="M80 320C100 200 300 200 320 320" fill="none" stroke="url(#vz-ring)" stroke-width="10" />
+  
+  <!-- Sparkle -->
+  <path d="M320 130L310 140L300 130L310 120ZM320 160L310 150L300 160L310 170ZM300 140L310 140L320 140L310 130ZM310 160L320 160L330 160L320 170Z" fill="#ffffff" />
+  
+  <!-- Glow behind V -->
+  <circle cx="180" cy="230" r="100" fill="#7c5cff" opacity="0.3" filter="url(#glow)" />
 </svg>

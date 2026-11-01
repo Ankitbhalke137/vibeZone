@@ -485,7 +485,7 @@ export default function LandingPage() {
                 Your campus is already here.
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/80">
-                Sign in with your campus email and join the conversation — no passwords, no noise.
+                Connect · Learn · Engage · Grow
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 <Link
