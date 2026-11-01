@@ -35,7 +35,7 @@ type PostRow = {
   }[];
 };
 
-function serialize(row: PostRow): FeedPost {
+export function serialize(row: PostRow): FeedPost {
   return {
     id: row.id,
     body: row.body,
