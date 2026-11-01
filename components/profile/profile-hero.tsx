@@ -1,18 +1,30 @@
-import { CalendarDays, GraduationCap, MapPin, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  CalendarDays,
+  GraduationCap,
+  MapPin,
+  ShieldCheck,
+} from "lucide-react";
 import { Avatar } from "@/components/avatar";
+import { TiltAvatar } from "@/components/3d/tilt-avatar";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const ROLE_TONE: Record<string, BadgeTone> = {
   student: "neutral",
   senior: "cyan",
+  club_leader: "amber",
   moderator: "violet",
+  faculty: "fuchsia",
   admin: "magenta",
 };
 
 const ROLE_LABEL: Record<string, string> = {
   student: "Student",
   senior: "Senior",
+  club_leader: "Club Leader",
   moderator: "Moderator",
+  faculty: "Faculty",
   admin: "Admin",
 };
 
@@ -50,7 +62,8 @@ export function ProfileHero({
   eyebrow?: string;
 }) {
   return (
-    <section className="vz-panel overflow-hidden">
+    <section className="vz-glass-card overflow-hidden">
+      {/* Hero banner */}
       <div className="vz-hero relative h-28 sm:h-36">
         <div className="vz-hero-glow pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full border border-white/10" />
@@ -62,8 +75,8 @@ export function ProfileHero({
 
       <div className="px-4 pb-4 sm:px-5 sm:pb-5">
         <div className="-mt-10 flex items-end justify-between gap-3 sm:-mt-12">
-          <div className="rounded-full bg-card p-1 shadow-lg">
-            <Avatar name={name} handle={handle} avatarUrl={avatarUrl} size="xl" />
+          <div className="relative z-10">
+            <TiltAvatar name={name} handle={handle} avatarUrl={avatarUrl} size="xl" />
           </div>
           {action ? <div className="mb-1 shrink-0">{action}</div> : null}
         </div>
@@ -73,7 +86,9 @@ export function ProfileHero({
             <div className="flex flex-wrap items-center gap-1.5">
               <h1 className="truncate text-xl font-black tracking-tight sm:text-2xl">{name}</h1>
               <Badge tone={ROLE_TONE[role] ?? "neutral"} className="normal-case tracking-normal">
-                {role === "moderator" || role === "admin" ? <ShieldCheck size={9} /> : null}
+                {role === "moderator" || role === "admin" || role === "faculty" ? (
+                  <ShieldCheck size={9} />
+                ) : null}
                 {ROLE_LABEL[role] ?? role}
               </Badge>
             </div>
@@ -122,17 +137,25 @@ export function ProfileHero({
           </div>
         ) : null}
 
-        <dl className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3 sm:grid-cols-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3 sm:grid-cols-4"
+        >
           {stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl bg-[var(--vz-card-2)] px-2.5 py-2">
+            <motion.div
+              key={stat.label}
+              whileHover={{ y: -2 }}
+              className="vz-glow-inner rounded-xl bg-[var(--vz-card-2)] px-2.5 py-2"
+            >
               <dt className="text-[8.5px] font-bold uppercase tracking-wide text-muted-2">
                 {stat.label}
               </dt>
               <dd className="mt-0.5 text-base font-black leading-none">{stat.value}</dd>
               {stat.hint ? <p className="mt-0.5 text-[8.5px] text-muted">{stat.hint}</p> : null}
-            </div>
+            </motion.div>
           ))}
-        </dl>
+        </motion.div>
       </div>
     </section>
   );

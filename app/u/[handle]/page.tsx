@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
@@ -91,6 +92,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
     year: "numeric",
   });
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-4">
       <ProfileHero
@@ -129,7 +135,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <section className="flex min-w-0 flex-col gap-3">
+        <motion.div
+          initial={cardVariants.hidden}
+          animate={cardVariants.visible}
+          className="flex min-w-0 flex-col gap-3"
+        >
           <SectionHeader
             title={isMe ? "Your posts" : `Posts by ${user.name.split(" ")[0]}`}
             description={`${postCount} post${postCount === 1 ? "" : "s"} on the campus feed`}
@@ -147,10 +157,15 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
                 : "When they post to campus, their updates will appear here."
             }
           />
-        </section>
+        </motion.div>
 
         <aside className="flex min-w-0 flex-col gap-3">
-          <section className="vz-panel p-4">
+          <motion.div
+            initial={cardVariants.hidden}
+            animate={cardVariants.visible}
+            transition={{ delay: 0.1 }}
+            className="vz-glass-card p-4"
+          >
             <SectionHeader
               title="About"
               description="A little context"
@@ -200,10 +215,15 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
                 </div>
               </div>
             ) : null}
-          </section>
+          </motion.div>
 
           {!isMe ? (
-            <section className="vz-panel vz-soft-gradient p-4">
+            <motion.div
+              initial={cardVariants.hidden}
+              animate={cardVariants.visible}
+              transition={{ delay: 0.2 }}
+              className="vz-glass-card vz-soft-gradient p-4"
+            >
               <SectionHeader
                 title="Say hello"
                 description="Direct messages are private"
@@ -216,11 +236,16 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
               <div className="mt-3">
                 <DmButton userId={user.id} label={`Message ${user.name.split(" ")[0]}`} />
               </div>
-            </section>
+            </motion.div>
           ) : null}
 
           {similar.length > 0 ? (
-            <section className="vz-panel p-4">
+            <motion.div
+              initial={cardVariants.hidden}
+              animate={cardVariants.visible}
+              transition={{ delay: 0.3 }}
+              className="vz-glass-card p-4"
+            >
               <SectionHeader
                 title={user.branch ? `More from ${user.branch}` : "More people"}
                 icon={<Users size={14} />}
@@ -254,7 +279,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
                   </li>
                 ))}
               </ul>
-            </section>
+            </motion.div>
           ) : null}
 
           <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
