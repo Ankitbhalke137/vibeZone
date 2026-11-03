@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const Body = z.object({
+  postId: z.string(),
+});
 
 export async function GET() {
   try {
@@ -50,5 +55,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: "Failed to bookmark" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const { id } = await req.json();
+
+    await db.postBookmark.delete({
+      where: { postId_userId: { postId: id, userId: user.id } },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: "Failed to unbookmark" }, { status: 500 });
   }
 }

@@ -66,6 +66,11 @@ model User {
   postLikes     PostLike[]
   postComments  PostComment[]
   postBookmarks PostBookmark[]
+  academicCalendar   AcademicCalendar[]
+  studyGroups        StudyGroup[]
+  questions          Question[]
+  answers            Answer[]
+  placementResources PlacementResource[]
 
   @@index([role])
   @@map("users")
@@ -576,4 +581,99 @@ model AuditLog {
 
   @@index([createdAt(sort: Desc)])
   @@map("audit_logs")
+}
+
+// ============ Academic Calendar ============
+
+model AcademicCalendar {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String   @db.VarChar(200)
+  description String? @db.Text
+  category   String   @db.VarChar(20) // exam|assignment|holiday|event|deadline
+  startsAt   DateTime @map("starts_at")
+  endsAt     DateTime? @map("ends_at")
+  location   String?  @db.VarChar(200)
+  isAllDay   Boolean   @default(false) @map("is_all_day")
+  createdBy  String   @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  creator User @relation(fields: [createdBy], references: [id])
+
+  @@index([startsAt])
+  @@map("academic_calendar")
+}
+
+// ============ Study Groups ============
+
+model StudyGroup {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String   @db.VarChar(100)
+  description String? @db.Text
+  subject    String   @db.VarChar(100)
+  branch     String? @db.VarChar(50)
+  year       Int?     @db.SmallInt
+  maxMembers Int?     @db.SmallInt @default(20)
+  createdBy  String   @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  creator   User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("study_groups")
+}
+
+
+
+
+
+// ============ Campus Q&A ============
+
+model Question {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String   @db.VarChar(200)
+  body       String   @db.Text
+  category   String   @db.VarChar(50) @default("general")
+  tags       String[] @default([])
+  authorId   String   @map("author_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  resolvedAt DateTime? @map("resolved_at")
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  answers  Answer[]
+
+  @@index([createdAt(sort: Desc)])
+  @@map("questions")
+}
+
+model Answer {
+  id         String   @id @default(uuid()) @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  body       String   @db.Text
+  isAccepted Boolean   @default(false) @map("is_accepted")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("answers")
+}
+
+// ============ Placement Resources ============
+
+model PlacementResource {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String   @db.VarChar(200)
+  company    String   @db.VarChar(100)
+  description String? @db.Text
+  category   String   @db.VarChar(50) // internship|full-time|resource|event
+  url        String?  @db.VarChar(500)
+  tags       String[] @default([])
+  createdBy  String   @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  creator User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("placement_resources")
 }
