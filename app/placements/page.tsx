@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, GraduationCap, Plus, Building2 } from "lucide-react";
+import { Building2, Mail } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form";
@@ -66,7 +66,7 @@ export default function PlacementsPage() {
         body: JSON.stringify({
           title: newResource.title,
           company: newResource.company,
-          description: newGroup.description,
+          description: newResource.description,
           category: newResource.category,
           url: newResource.url,
           tags: newResource.tags.split(",").map((t) => t.trim()).filter(Boolean),
@@ -104,15 +104,10 @@ export default function PlacementsPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
-            <div className="w-8 h-8 rounded-full bg-primary/20 animate-pulse"></div>
-            <p>Loading resources...</p>
-          </div>
-        ) : resources.length === 0 ? (
+        {resources.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
             <Building2 size={48} className="mb-4 opacity-50" />
-            <p>No resources yet</p>
+            <p>No resources yet.</p>
             <Button onClick={() => setOpenDialog(true)} className="mt-4">
               Add Resource
             </Button>
@@ -122,8 +117,8 @@ export default function PlacementsPage() {
             {resources.map((resource) => (
               <div key={resource.id} className="vz-panel p-4 hover:vz-card-hover transition-colors">
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <Badge tone="primary" className="normal-case tracking-normal text-[9px]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={CATEGORY_COLORS[resource.category] ?? "neutral"} className="normal-case tracking-normal">
                       {resource.category}
                     </Badge>
                     <Badge tone="cyan" className="normal-case tracking-normal text-[9px]">
@@ -131,18 +126,14 @@ export default function PlacementsPage() {
                     </Badge>
                   </div>
                   <h3 className="text-sm font-bold">{resource.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-[10.5px] text-muted">
-                    {resource.description}
-                  </p>
+                  <p className="mt-1 line-clamp-2 text-[10.5px] text-muted">{resource.description}</p>
                 </div>
-                <div className="mt-3 flex items-center gap-2 text-[9px] text-muted">
-                  {resource.tags.map((tag) => (
-                    <span key={tag} className="inline-flex items-center gap-1 rounded-sm bg-accent px-1 py-0.5">
-                      #{tag}
-                    </span>
-                  ))}
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] text-muted">by {resource.creator?.handle}</span>
+                  </div>
                   {resource.url && (
-                    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline underline-offset-4">
+                    <a href={resource.url} className="text-[9px] text-primary underline underline-offset-4">
                       View Resource →
                     </a>
                   )}
@@ -153,7 +144,7 @@ export default function PlacementsPage() {
         </div>
       </section>
 
-      <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="Add Resource">
+      <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="Add Placement Resource">
         <form onSubmit={createResource} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-semibold text-muted">Title</label>
@@ -171,16 +162,6 @@ export default function PlacementsPage() {
               onChange={(e) => setNewResource({ ...newResource, company: e.target.value })}
               className="h-9 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
               placeholder="e.g., Google, Microsoft, Amazon"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted">Description</label>
-            <Textarea
-              value={newResource.description}
-              onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
-              rows={4}
-              className="h-32 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
-              placeholder="Describe the resource..."
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -207,7 +188,7 @@ export default function PlacementsPage() {
               value={newResource.tags}
               onChange={(e) => setNewResource({ ...newResource, tags: e.target.value })}
               className="h-9 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
-              placeholder="e.g., DSA, System Design, Backend"
+              placeholder="e.g., DSA, Placements, Interview"
             />
           </div>
           <div className="flex justify-end gap-2 mt-4">
@@ -225,3 +206,11 @@ export default function PlacementsPage() {
 function cn(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Academic: "bg-red-100 text-red-700 border-red-200",
+  Cultural: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
+  Sports: "bg-green-100 text-green-700 border-green-200",
+  Clubs: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  Placement: "bg-amber-100 text-amber-700 border-amber-200",
+};
