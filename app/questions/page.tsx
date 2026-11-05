@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Mail, ChevronRight, ArrowRight, ArrowUpRight } from "lucide-react";
+import { Mail, ChevronRight, ArrowRight, ArrowUpRight, Plus } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/form";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 type Question = {
   id: string;
@@ -21,7 +22,7 @@ type Question = {
   createdAt: string;
 };
 
-export default function PollsPage() {
+export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -90,46 +91,38 @@ export default function PollsPage() {
       </div>
 
       <div className="mx-auto max-w-5xl px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {questions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
-              <Mail size={48} className="mb-3 opacity-50" />
-              <p>No questions yet</p>
-              <Button onClick={() => setOpenDialog(true)} className="mt-4">
-                Ask Question
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {questions.map((q) => (
-                <div key={q.id} className="vz-panel p-4 hover:vz-card-hover transition-colors">
-                  <div className="flex flex-col gap-2">
+        {questions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
+            <Mail size={48} className="mb-4 opacity-50" />
+            <p>No questions yet</p>
+            <Button onClick={() => setOpenDialog(true)} className="mt-4">
+              Ask Question
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {questions.map((q) => (
+              <div key={q.id} className="vz-panel p-4 hover:vz-card-hover transition-colors">
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone="primary" className="normal-case tracking-normal">
+                      {q.category}
+                    </Badge>
+                    <span className="text-[9px] text-muted">
+                      {q.tags.slice(0, 3).join(", ")}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold">{q.title}</h3>
+                  <p className="mt-1 line-clamp-2 text-[10.5px] text-muted">{q.body}</p>
+                  <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-2">
-                      <Badge tone="primary" className="normal-case tracking-normal text-[9px]">
-                        {q.category}
-                      </Badge>
-                      <span className="text-[9px] text-muted">
-                        {q.tags.slice(0, 3).join(", ")}
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-bold">{q.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-[10.5px] text-muted">
-                      {q.body}
-                    </p>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-muted">
-                          by @{q.author.handle}
-                        </span>
-                        <span className="text-[9px] text-muted">
-                          {q._count.answers} answers
-                        </span>
-                      </div>
+                      <span className="text-[9px] text-muted">by @{q.author.handle}</span>
+                      <span className="text-[9px] text-muted">{q._count.answers} answers</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            )}
+              </div>
+            ))}
           )}
         </div>
 

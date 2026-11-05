@@ -74,7 +74,14 @@ export default function StudyGroupsPage() {
       });
       if (res.ok) {
         setOpenDialog(false);
-        setNewGroup({ title: "", description: "", subject: "", branch: "", year: "", maxMembers: "" });
+        setNewGroup({
+          title: "",
+          description: "",
+          subject: "",
+          branch: "",
+          year: "",
+          maxMembers: "",
+        });
         await loadGroups();
       }
     } catch (e) {
@@ -96,42 +103,35 @@ export default function StudyGroupsPage() {
         </Button>
       </div>
 
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
-          <div className="w-8 h-8 rounded-full bg-primary/20 animate-pulse"></div>
-          <p>Loading groups...</p>
-        </div>
-      ) : (
-        <div className="mx-auto max-w-7xl px-6">
-          {groups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
-              <Users size={48} className="mb-4 opacity-50" />
-              <p>No study groups yet. Create one to get started!</p>
-              <Button onClick={() => setOpenDialog(true)} className="mt-4">
-                Create Group
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {groups.map((group) => (
-                <div key={group.id} className="vz-panel p-4 hover:vz-card-hover transition-colors">
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-sm font-semibold">{group.title}</h3>
-                    <p className="text-[9px] text-muted">{group.subject}</p>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <Badge tone="primary" className="normal-case tracking-normal">
-                      {group.branch || "Any Branch"}
-                    </Badge>
-                    <span className="text-[9px] text-muted">
-                      {group.maxMembers ? group.members.length + "/" + group.maxMembers : group.members.length} members
-                    </span>
-                  </div>
-                  <div className="mt-3">
-                    <Badge tone="cyan" className="normal-case tracking-normal text-[9px]">
-                      Year {group.year}
-                    </Badge>
-                  </div>
+      <div className="mx-auto max-w-7xl px-6">
+        {groups.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center text-muted">
+            <Users size={48} className="mb-4 opacity-50" />
+            <p>No study groups yet. Create one to get started!</p>
+            <Button onClick={() => setOpenDialog(true)} className="mt-4">
+              Create Group
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groups.map((group) => (
+              <div key={group.id} className="vz-panel p-4 hover:vz-card-hover transition-colors">
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-sm font-semibold">{group.title}</h3>
+                  <p className="text-[9px] text-muted">{group.subject}</p>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <Badge tone="primary" className="normal-case tracking-normal">
+                    {group.branch || "Any Branch"}
+                  </Badge>
+                  <span className="text-[9px] text-muted">
+                    {group.maxMembers ? group.members.length + "/" + group.maxMembers : group.members.length} members
+                  </span>
+                </div>
+                <div className="mt-3">
+                  <Badge tone="cyan" className="normal-case tracking-normal text-[9px]">
+                    Year {group.year}
+                  </Badge>
                 </div>
               </div>
             ))}
