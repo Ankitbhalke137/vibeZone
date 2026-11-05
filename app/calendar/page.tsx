@@ -199,7 +199,7 @@ export default function CalendarPage() {
                 )}
               </div>
             );
-          )}
+          })}
           {daysAfter.map((day) => (
             <div key={`after-${day}`} className="h-24 flex flex-col items-center justify-center text-[10px] text-muted-40">
               <span>{day}</span>
@@ -209,7 +209,7 @@ export default function CalendarPage() {
       </section>
 
       <div className="mt-8 mx-auto max-w-4xl">
-        <h3 className="text-lg font-bold mb-4">Upcoming Events</h2>
+        <h3 className="text-lg font-bold mb-4">Upcoming Events</h3>
         <div className="flex flex-col gap-2">
           {events
             .filter((e) => new Date(e.startsAt) >= new Date(currentYear, currentMonth, 1))
@@ -231,7 +231,6 @@ export default function CalendarPage() {
                 </span>
               </div>
             ))}
-          )}
           {events.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-center text-muted">
               <CalendarDays size={48} className="mb-3 opacity-50" />
@@ -239,7 +238,7 @@ export default function CalendarPage() {
             </div>
           )}
         </div>
-      </section>
+      </div>
 
       <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="New Event" description="Add a new event to your calendar">
         <form onSubmit={createEvent} className="flex flex-col gap-3">

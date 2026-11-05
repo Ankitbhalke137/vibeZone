@@ -149,9 +149,9 @@ export default function PlacementsPage() {
                 </div>
               </div>
             ))}
-          )}
-        </div>
-      </section>
+          </div>
+        )}
+      </div>
 
       <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="Add Resource">
         <form onSubmit={createResource} className="flex flex-col gap-3">
