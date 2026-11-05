@@ -133,11 +133,11 @@ export default function StudyGroupsPage() {
                     </Badge>
                   </div>
                 </div>
-              </div>
-            ))}
-          )}
-        </div>
-      </section>
+              ))}
+          </div>
+        )}
+      </div>
+    )}
 
       <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="Create Study Group">
         <form onSubmit={createGroup} className="flex flex-col gap-3">
