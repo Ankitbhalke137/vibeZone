@@ -36,7 +36,19 @@ export function Brand({
           width={size === "sm" ? 32 : size === "md" ? 40 : 56}
           height={size === "sm" ? 32 : size === "md" ? 40 : 56}
           fill="none"
+          aria-hidden="true"
         >
+          <defs>
+            <linearGradient id="vz-gradient" x1="60" y1="140" x2="220" y2="320" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#7c5cff" />
+              <stop offset="50%" stopColor="#a855f7" />
+              <stop offset="100%" stopColor="#d946ef" />
+            </linearGradient>
+            <linearGradient id="vz-ring" x1="80" y1="200" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#7c5cff" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#d946ef" stopOpacity="0.25" />
+            </linearGradient>
+          </defs>
           <path
             d="M60 320L140 140L220 320"
             stroke="url(#vz-gradient)"
