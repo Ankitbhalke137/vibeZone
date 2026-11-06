@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Monitor, Moon, Sun, LogOut, ShieldCheck, Check } from "lucide-react";
+import { Monitor, Moon, Sun, LogOut, ShieldCheck, Check, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { PushSubscribe } from "@/components/ui/push-subscribe";
 
 const THEMES = [
   { value: "light", label: "Light lavender", icon: Sun, hint: "Bright, soft and default" },
@@ -32,6 +33,7 @@ export function SettingsPanel({ user }: { user: User }) {
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -124,6 +126,20 @@ export function SettingsPanel({ user }: { user: User }) {
             <Button variant="danger" onClick={signOut} disabled={busy}>
               <LogOut size={14} /> {busy ? "Signing out…" : "Sign out"}
             </Button>
+          </div>
+        </section>
+
+        <section className="vz-panel p-5">
+          <h2 className="text-sm font-bold">Notifications</h2>
+          <p className="mt-0.5 text-[11px] text-muted">
+            Get push alerts for mentions, event reminders, and club updates on this device.
+          </p>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <PushSubscribe
+              enabled={pushEnabled}
+              onChange={setPushEnabled}
+              className="shrink-0"
+            />
           </div>
         </section>
       </div>
