@@ -58,6 +58,8 @@ export const config = {
     "/lost-and-found/:path*",
     "/mentorship/:path*",
     "/calendar/:path*",
+    "/clubs/:path*",
+    "/my-club-applications/:path*",
     "/questions/:path*",
     "/study-groups/:path*",
     "/placements/:path*",

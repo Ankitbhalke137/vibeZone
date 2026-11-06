@@ -23,7 +23,10 @@ export type AuditAction =
   | "report_dismiss"
   | "report_action"
   | "mentorship_accept"
-  | "mentorship_reject";
+  | "mentorship_reject"
+  | "club_create"
+  | "club_position_create"
+  | "club_application_review";
 
 /** Every privileged action lands in audit_logs (PRD §10, Week 5 compliance gate). */
 export async function audit(entry: {

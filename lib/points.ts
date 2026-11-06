@@ -22,6 +22,7 @@ export const POINTS = {
   note_upvoted: { points: 2, cap: 10 },
   lostfound_post: { points: 5, cap: 1 },
   post_create: { points: 2, cap: 5 },
+  club_application: { points: 10, cap: null },
   quiz_complete: { points: 25, cap: null },
   mentorship_accept: { points: 15, cap: null },
   report_actioned: { points: 5, cap: 2 },
