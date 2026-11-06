@@ -86,7 +86,7 @@ export function PushSubscribe({
     }
   }, [onChange, toast]);
 
-  // Check existing subscription on mount
+  // Check existing subscription on mount; auto-subscribe when push is on by default.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -101,17 +101,22 @@ export function PushSubscribe({
         if (subscription) {
           setStatus("subscribed");
           if (!enabled) onChange(true);
+        } else if (enabled) {
+          // Push is on by default — subscribe automatically.
+          await subscribe();
         } else {
           setStatus("idle");
-          if (enabled) onChange(false);
+          onChange(false);
         }
       } catch {
+        // Auto-subscribe can fail without a user gesture — fall back to showing the button.
         if (cancelled) return;
         setStatus("idle");
+        if (enabled) onChange(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [enabled, onChange]);
+  }, [enabled, onChange, subscribe]);
 
   const isSubscribed = status === "subscribed";
   const shouldShow = status !== "subscribed";

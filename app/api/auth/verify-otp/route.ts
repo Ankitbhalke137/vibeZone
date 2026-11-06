@@ -61,6 +61,19 @@ export async function POST(req: Request) {
     });
   }
 
+  // Ensure notification preferences exist with push enabled by default (FR-NOTIF-002).
+  if (isNew) {
+    await db.notificationPref.create({
+      data: {
+        userId: user.id,
+        category: "system",
+        pushEnabled: true,
+        inappEnabled: true,
+        emailEnabled: false,
+      },
+    });
+  }
+
   if (user.status === "banned") {
     return NextResponse.json(
       { error: "This account is suspended. Contact the campus admins to appeal." },

@@ -41,3 +41,4 @@ next-env.d.ts
 
 # local scratch scripts — may contain dev credentials, never commit
 /test-clubs.mjs
+.env*
