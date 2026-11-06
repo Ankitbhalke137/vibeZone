@@ -85,7 +85,7 @@ export async function POST(req: Request) {
             type: "club_application",
             title: "New club application",
             body: `${me.name} applied for ${position.title} at ${position.club.name}`,
-            link: `/admin/clubs`,
+            link: `/clubs/${position.club.slug}`,
           }),
         ),
       );

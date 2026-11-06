@@ -1,27 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { db } from "@/lib/db";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Input, Textarea, Label, Card } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, ArrowRight, Users, PenLine } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
-
-export default function ApplyPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string; pid: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
+export default function ApplyPage() {
   const router = useRouter();
-  const sp = searchParams;
-  const next = (sp.then((s) => s.next) as Promise<string | undefined>) as Promise<string | undefined>;
+  const params = useParams<{ slug: string; pid: string }>();
+  const pid = params?.pid;
 
   const [position, setPosition] = useState<any>(null);
   const [club, setClub] = useState<any>(null);
@@ -38,38 +28,43 @@ export default function ApplyPage({
     resumeUrl: "",
   });
 
-  async function load() {
-    try {
-      const [posRes, meRes] = await Promise.all([
-        fetch(`/api/club-applications/positions/${(await params).pid}`),
-        fetch("/api/me", { cache: "no-store" }),
-      ]);
-      if (posRes.ok) {
-        const data = await posRes.json();
-        setPosition(data.position);
-        setClub(data.club);
-      }
-      if (meRes.ok) {
-        const d = await meRes.json();
-        setMe(d.user ?? null);
-        if (d.user) {
-          setForm((prev) => ({
-            ...prev,
-            fullName: d.user.name || "",
-          }));
-        }
-      }
-    } catch {
-      /* ignore */
-    } finally {
-      setLoading(false);
-    }
-  }
+  useEffect(() => {
+    if (!pid) return;
+    let cancelled = false;
 
-  // load is called in useEffect equivalent via immediate invocation
-  if (typeof window !== "undefined") {
+    async function load() {
+      try {
+        const [posRes, meRes] = await Promise.all([
+          fetch(`/api/club-applications/positions/${pid}`),
+          fetch("/api/me", { cache: "no-store" }),
+        ]);
+        if (cancelled) return;
+        if (posRes.ok) {
+          const data = await posRes.json();
+          if (cancelled) return;
+          setPosition(data.position);
+          setClub(data.club);
+        }
+        if (meRes.ok) {
+          const d = await meRes.json();
+          if (cancelled) return;
+          setMe(d.user ?? null);
+          if (d.user) {
+            setForm((prev) => ({ ...prev, fullName: d.user.name || "" }));
+          }
+        }
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
     void load();
-  }
+    return () => {
+      cancelled = true;
+    };
+  }, [pid]);
 
   if (loading) {
     return (
@@ -101,12 +96,8 @@ export default function ApplyPage({
   const eligible =
     position.eligibleYear === null
       ? "Open to all years"
-      : `Only ${position.eligibleYear === 4 ? "2025 Batch" : "2026 Batch"} students`;
-  const alreadyApplied = me
-    ? position._count?.applications?.some(
-        (a: any) => a.userId === me.id,
-      ) || false
-    : false;
+      : `Only 20${30 - position.eligibleYear} Batch students`;
+  const alreadyApplied = position.applied === true;
 
   if (!me) {
     return (

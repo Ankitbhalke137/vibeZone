@@ -21,8 +21,12 @@ const CLUB_META: Record<string, { color: string; Icon: React.ElementType }> = {
   "social-welfare": { color: "fuchsia", Icon: HeartHandshake },
 };
 
-export default async function ClubsPage({ searchParams }: { searchParams: { category?: string } }) {
-  const category = searchParams.category;
+export default async function ClubsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
 
   let clubs = await db.club.findMany({
     where: {
@@ -142,7 +146,7 @@ function ClubCard({ club }: { club: any }) {
           )}
         </div>
         <div className="mt-auto flex items-center justify-between text-[10px] font-medium text-muted">
-          <span>{club.applications.length} applied</span>
+          <span>{club._count.applications} applied</span>
           <span className="text-primary">
             View positions <span aria-hidden="true">→</span>
           </span>

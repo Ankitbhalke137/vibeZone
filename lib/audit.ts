@@ -25,6 +25,8 @@ export type AuditAction =
   | "mentorship_accept"
   | "mentorship_reject"
   | "club_create"
+  | "club_edit"
+  | "club_archive"
   | "club_position_create"
   | "club_application_review";
 

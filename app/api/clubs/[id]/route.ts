@@ -110,7 +110,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     await audit({
       actorId: me.id,
-      action: "event_edit",
+      action: "club_edit",
       targetType: "club",
       targetId: id,
       metadata: { name: updated.name, slug: updated.slug },
@@ -126,7 +126,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     assertSameOrigin(req);
-    await requireUser("moderator");
+    const me = await requireUser("moderator");
     const { id } = await params;
     if (!isUuid(id)) {
       return NextResponse.json({ error: "Invalid club id." }, { status: 400 });
@@ -140,6 +140,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await db.club.update({
       where: { id },
       data: { status: "archived" },
+    });
+
+    await audit({
+      actorId: me.id,
+      action: "club_archive",
+      targetType: "club",
+      targetId: id,
+      metadata: { name: club.name, slug: club.slug },
     });
 
     return NextResponse.json({ ok: true });
