@@ -9,7 +9,7 @@
 
 | Layer | Choice |
 |---|---|
-| App | Next.js 15 (App Router) on **Vercel Hobby**, region `bom1` (Mumbai) |
+| App | Next.js 16 (App Router, Turbopack) on **Vercel Hobby**, region `bom1` (Mumbai) |
 | DB | **Neon Postgres** (free tier) — pooled URL for the app, direct URL for Prisma |
 | Realtime | Socket.IO gateway on the OCI Always Free VM (WSS via `sslip.io`) |
 | Email | Gmail SMTP :587 via the VM mailer (`vibezoneioi25@gmail.com`) |
@@ -36,6 +36,10 @@
 - [x] Notifications: in-app inbox, preferences, Web Push (VAPID)
 - [x] Lost & Found + Seniors Connect (P1) — request → accept → mentorship DM
 - [x] Admin dashboard: reports, feedback, users/roles, events, polls, announcements
+- [x] Broadcast video streaming — live/upcoming/replay with embedded player and viewer counts
+- [x] Campus Arcade — weekly quiz, server-side scoring, one attempt per week, points award
+- [x] Academic calendar, Q&A threads with accepted answers, study groups, placement resources
+- [x] Content automation — cached Daily Drop (public joke API + offline fallback) on the home feed
 - [x] PWA manifest/service worker, GA4 taxonomy, security headers
 
 ## Local development
@@ -52,7 +56,9 @@ cp .env.example .env.local
 # 3. Database (Neon)
 npm run db:push          # create/update tables
 npm run db:harden        # add CHECK constraints (idempotent)
-npm run db:seed          # channels + announcements + events + notes + polls
+npm run db:seed          # channels, announcements + full demo data for every module
+#    demo logins: isha@pwioi.com (student), zoya@pwioi.com (moderator),
+#                 ananya@pwioi.com (senior) — use the dev OTP printed in the terminal
 
 # 4. Run
 npm run dev              # http://localhost:3000

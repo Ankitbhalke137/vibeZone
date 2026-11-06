@@ -44,9 +44,9 @@ export function TiltAvatar({
       className={cn("vz-stage-3d vz-tilt inline-block cursor-pointer", className)}
     >
       {/* rotateY controlled by mouse X */}
-      <animated.div style={{ transform: props.x.interpolate((x) => `rotateY(${x}deg)`) }}>
+      <animated.div style={{ transform: props.x.to((x) => `rotateY(${x}deg)`) }}>
         {/* rotateX controlled by mouse Y */}
-        <animated.div style={{ transform: props.y.interpolate((y) => `rotateX(${y}deg)`) }}>
+        <animated.div style={{ transform: props.y.to((y) => `rotateX(${y}deg)`) }}>
           <div className="relative z-10">
             <Avatar name={name} handle={handle} avatarUrl={avatarUrl} size={size} />
           </div>

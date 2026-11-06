@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/ui/motion";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -88,7 +88,7 @@ export default async function ProfilePage() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="flex min-w-0 flex-col gap-3">
-          <motion.div
+          <MotionDiv
             initial={cardVariants.hidden}
             animate={cardVariants.visible}
             className="flex flex-col gap-3"
@@ -114,11 +114,11 @@ export default async function ProfilePage() {
               emptyTitle="Your feed is waiting"
               emptyDescription="Share an update, a question or a win. Your posts will collect here."
             />
-          </motion.div>
+          </MotionDiv>
         </div>
 
         <aside id="account" className="flex min-w-0 flex-col gap-3 scroll-mt-20">
-          <motion.div
+          <MotionDiv
             initial={cardVariants.hidden}
             animate={cardVariants.visible}
             transition={{ delay: 0.1 }}
@@ -155,9 +155,9 @@ export default async function ProfilePage() {
                 <dd className="font-semibold">{messages.toLocaleString("en-IN")}</dd>
               </div>
             </dl>
-          </motion.div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             initial={cardVariants.hidden}
             animate={cardVariants.visible}
             transition={{ delay: 0.2 }}
@@ -178,9 +178,9 @@ export default async function ProfilePage() {
                 }}
               />
             </div>
-          </motion.div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             initial={cardVariants.hidden}
             animate={cardVariants.visible}
             transition={{ delay: 0.3 }}
@@ -199,7 +199,7 @@ export default async function ProfilePage() {
                 <SignOutEverywhereButton />
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         </aside>
       </div>
     </div>

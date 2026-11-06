@@ -6,7 +6,7 @@
 
 DO $$ BEGIN
   ALTER TABLE users ADD CONSTRAINT users_role_chk
-    CHECK (role IN ('student','senior','moderator','admin'));
+    CHECK (role IN ('student','senior','club_leader','moderator','faculty','admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -92,3 +92,8 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- Performance indexes (feed + queues)
 CREATE INDEX IF NOT EXISTS idx_ann_feed ON announcements (pinned DESC, publish_at DESC);
 CREATE INDEX IF NOT EXISTS idx_points_bucket ON point_ledger (bucket_date, user_id);
+
+DO $$ BEGIN
+  ALTER TABLE broadcasts ADD CONSTRAINT broadcasts_status_chk
+    CHECK (status IN ('live','upcoming','ended'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;

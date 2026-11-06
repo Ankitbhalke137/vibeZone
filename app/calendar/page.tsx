@@ -1,20 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Calendar,
-  ChevronRight as ChevronRightIcon,
-} from "lucide-react";
-import { SectionHeader } from "@/components/ui/page-header";
+import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/form";
+import { Input, Textarea } from "@/components/ui/form";
 import { Modal } from "@/components/ui/modal";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
@@ -22,12 +15,12 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  exam: "bg-red-100 text-red-700 border-red-200",
-  assignment: "bg-blue-100 text-blue-700 border-blue-200",
-  holiday: "bg-green-100 text-green-700 border-green-200",
-  event: "bg-primary/10 text-primary border-primary/200",
-  deadline: "bg-amber-100 text-amber-700 border-amber-200",
+const CATEGORY_TONES: Record<string, BadgeTone> = {
+  exam: "red",
+  assignment: "cyan",
+  holiday: "green",
+  event: "violet",
+  deadline: "amber",
 };
 
 type CalendarEvent = {
@@ -47,12 +40,12 @@ export default function CalendarPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
     category: "event",
     startsAt: "",
-    endsAt: "",
     location: "",
     isAllDay: false,
   });
@@ -87,14 +80,15 @@ export default function CalendarPage() {
 
   const daysInMonth = Array.from({ length: totalDays }, (_, i) => i + 1);
   const daysBefore = Array.from({ length: startDay }, (_, i) => firstDay.getDate() - startDay + i + 1);
-  const daysAfter = Array.from({ length: 7 - ((startDay + totalDays) % 7) || 7 }, (_, i) => i + 1);
+  const daysAfter = Array.from({ length: (7 - ((startDay + totalDays) % 7)) % 7 }, (_, i) => i + 1);
 
   const eventsByDay = events.reduce((acc: Record<string, CalendarEvent[]>, event) => {
-    const date = new Date(event.startsAt).toISOString().split("T")[0];
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(event);
+    const date = new Date(event.startsAt);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(event);
     return acc;
-  }, {} as Record<string, CalendarEvent[]>);
+  }, {});
 
   function getDayEvents(date: number) {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
@@ -116,139 +110,163 @@ export default function CalendarPage() {
 
   async function createEvent(e: React.FormEvent) {
     e.preventDefault();
+    setFormError(null);
+    if (!newEvent.title.trim() || !newEvent.startsAt) {
+      setFormError("A title and start time are required.");
+      return;
+    }
     try {
       const res = await fetch("/api/v1/calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newEvent),
+        body: JSON.stringify({
+          title: newEvent.title.trim(),
+          description: newEvent.description.trim() || undefined,
+          category: newEvent.category,
+          startsAt: new Date(newEvent.startsAt).toISOString(),
+          location: newEvent.location.trim() || undefined,
+          isAllDay: newEvent.isAllDay,
+        }),
       });
       if (res.ok) {
         setOpenDialog(false);
-        setNewEvent({ title: "", description: "", category: "event", startsAt: "", endsAt: "", location: "", isAllDay: false });
+        setNewEvent({ title: "", description: "", category: "event", startsAt: "", location: "", isAllDay: false });
         await loadEvents();
+      } else {
+        const data = await res.json().catch(() => null);
+        setFormError(data?.error ?? "Could not create the event. Please sign in and try again.");
       }
-    } catch (e) {
-      console.error("Failed to create event:", e);
+    } catch (err) {
+      console.error("Failed to create event:", err);
+      setFormError("Network error. Please try again.");
     }
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <SectionHeader
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        eyebrow="Campus"
         title="Academic Calendar"
-        description="Track exams, assignments, holidays, and campus events"
-        icon={<CalendarDays size={14} />}
+        description="Track exams, assignments, holidays, and campus events in one shared calendar."
+        actions={
+          <Button onClick={() => setOpenDialog(true)}>
+            <Plus size={14} /> New event
+          </Button>
+        }
       />
 
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center justify-between w-full">
-          <Button variant="outline" size="sm" onClick={prevMonth} disabled={currentMonth === 0 && currentYear === 2024}>
-            <ChevronLeft size={14} />
+      <div className="vz-panel overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <Button variant="ghost" size="sm" onClick={prevMonth} aria-label="Previous month">
+            <ChevronLeft size={16} />
           </Button>
-          <h2 className="text-xl font-bold">{MONTHS[currentMonth]} {currentYear}</h2>
-          <Button variant="outline" size="sm" onClick={nextMonth}>
-            <ChevronRight size={14} />
+          <h2 className="text-base font-bold tracking-tight">
+            {MONTHS[currentMonth]} {currentYear}
+          </h2>
+          <Button variant="ghost" size="sm" onClick={nextMonth} aria-label="Next month">
+            <ChevronRight size={16} />
           </Button>
         </div>
-      </div>
 
-      <section className="mx-auto max-w-5xl px-6">
-        <div className="grid grid-cols-7 gap-1 mb-4">
+        <div className="grid grid-cols-7 border-b border-border bg-accent/40">
           {DAYS.map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-muted-2">
+            <div key={day} className="px-1 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-muted">
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1 h-[calc(100vh-350px)] min-h-[400px]">
+        <div className="grid grid-cols-7">
           {daysBefore.map((day) => (
-            <div key={`prev-${day}`} className="h-24 flex flex-col items-center justify-center text-[10px] text-muted-40">
-              <span>{day}</span>
+            <div key={`prev-${day}`} className="min-h-20 border-b border-r border-border/60 p-1.5 text-[10px] text-muted-2">
+              {day}
             </div>
           ))}
           {daysInMonth.map((day) => {
             const dayEvents = getDayEvents(day);
-            const isToday = day === new Date().getDate() && currentMonth === new Date().getMonth() && currentYear === new Date().getFullYear();
+            const now = new Date();
+            const isToday = day === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear();
             const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === currentMonth && selectedDate.getFullYear() === currentYear;
 
             return (
-              <div
+              <button
+                type="button"
                 key={day}
                 onClick={() => handleDateClick(day)}
                 className={cn(
-                  "h-24 flex flex-col items-center justify-center text-[9px] rounded-lg cursor-pointer transition-all",
-                  isSelected ? "ring-2 ring-primary ring-offset-1" : "",
-                  isToday ? "bg-primary/10 ring-1 ring-primary" : "",
-                  dayEvents.length > 0 ? "border border-primary/20" : "border border-transparent"
+                  "flex min-h-20 flex-col gap-0.5 border-b border-r border-border/60 p-1.5 text-left transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50",
+                  isSelected && "bg-primary/5 ring-2 ring-inset ring-primary/40",
+                  isToday && "bg-primary/10",
                 )}
               >
-                <div className="flex items-center justify-between mb-1 px-1">
-                  <span className="text-xs font-semibold">{day}</span>
-                  {isToday && <span className="text-[8px] font-bold bg-primary px-1 rounded">●</span>}
-                </div>
+                <span className={cn("text-[11px] font-semibold", isToday ? "text-primary" : "text-foreground")}>
+                  {day}
+                </span>
                 {dayEvents.slice(0, 2).map((event) => (
-                  <div key={event.id} className="h-5 flex items-center rounded-sm px-1 text-[8px] font-medium bg-primary/20 text-primary truncate" title={event.title}>
-                    {event.title.length > 10 ? `${event.title.slice(0, 8)}…` : event.title}
-                  </div>
+                  <span key={event.id} className="truncate rounded bg-primary/10 px-1 py-0.5 text-[9px] font-medium text-primary" title={event.title}>
+                    {event.title}
+                  </span>
                 ))}
                 {dayEvents.length > 2 && (
-                  <div className="h-5 flex items-center rounded-sm px-1 text-[8px] text-muted-2 bg-accent truncate">
-                    +{dayEvents.length - 2} more
-                  </div>
+                  <span className="px-1 text-[9px] text-muted">+{dayEvents.length - 2} more</span>
                 )}
-              </div>
+              </button>
             );
-          )}
+          })}
           {daysAfter.map((day) => (
-            <div key={`after-${day}`} className="h-24 flex flex-col items-center justify-center text-[10px] text-muted-40">
-              <span>{day}</span>
+            <div key={`after-${day}`} className="min-h-20 border-b border-r border-border/60 p-1.5 text-[10px] text-muted-2">
+              {day}
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <div className="mt-8 mx-auto max-w-4xl">
-        <h3 className="text-lg font-bold mb-4">Upcoming Events</h2>
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-bold tracking-tight">Upcoming events</h3>
         <div className="flex flex-col gap-2">
           {events
             .filter((e) => new Date(e.startsAt) >= new Date(currentYear, currentMonth, 1))
             .slice(0, 10)
             .map((event) => (
-              <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg border border-accent hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-2">
-                  <Badge tone={CATEGORY_COLORS[event.category] ? "primary" : "neutral"} className="normal-case tracking-normal text-[9px]">
-                    {event.category}
-                  </Badge>
-                  {event.isAllDay && <span className="text-[9px] font-medium text-primary">All day</span>}
-                </div>
+              <div key={event.id} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/30">
+                <Badge tone={CATEGORY_TONES[event.category] ?? "neutral"} className="mt-0.5 normal-case tracking-normal">
+                  {event.category}
+                </Badge>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{event.title}</p>
-                  {event.location && <p className="text-[9px] text-muted">{event.location}</p>}
+                  <p className="truncate text-sm font-medium">{event.title}</p>
+                  <p className="text-[11px] text-muted">
+                    {event.location ? `${event.location} · ` : ""}
+                    {new Date(event.startsAt).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                    {event.isAllDay ? " · All day" : ""}
+                  </p>
                 </div>
-                <span className="text-[10px] text-muted">
-                  {new Date(event.startsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                </span>
               </div>
             ))}
-          )}
-          {events.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-8 text-center text-muted">
-              <CalendarDays size={48} className="mb-3 opacity-50" />
-              <p>No upcoming events</p>
+          {!loading && events.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-10 text-center text-muted">
+              <CalendarDays size={32} className="opacity-50" />
+              <p className="text-sm">No events yet. Add the first one.</p>
+              <Button size="sm" variant="soft" onClick={() => setOpenDialog(true)}>
+                <Plus size={14} /> New event
+              </Button>
             </div>
           )}
         </div>
       </section>
 
-      <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="New Event" description="Add a new event to your calendar">
+      <Modal open={openDialog} onClose={() => setOpenDialog(false)} title="New calendar event" description={`Add an event on ${selectedDate.toLocaleDateString()}`}>
         <form onSubmit={createEvent} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-semibold text-muted">Title</label>
-            <input
+            <Input
               value={newEvent.title}
               onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-              className="h-9 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
+              placeholder="e.g. Mid-semester exams begin"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -257,61 +275,59 @@ export default function CalendarPage() {
               value={newEvent.description}
               onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
               rows={3}
-              className="h-24 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
+              placeholder="Optional details"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted">Category</label>
-            <select
-              value={newEvent.category}
-              onChange={(e) => setNewEvent({ ...newEvent, category: e.target.value })}
-              className="h-9 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
-            >
-              <option value="event">Event</option>
-              <option value="exam">Exam</option>
-              <option value="assignment">Assignment</option>
-              <option value="holiday">Holiday</option>
-              <option value="deadline">Deadline</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted">Starts At</label>
-            <input
-              type="datetime-local"
-              value={newEvent.startsAt}
-              onChange={(e) => setNewEvent({ ...newEvent, startsAt: e.target.value })}
-              className="h-9 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
-            />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-muted">Category</label>
+              <select
+                value={newEvent.category}
+                onChange={(e) => setNewEvent({ ...newEvent, category: e.target.value })}
+                className="h-11 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary/60"
+              >
+                <option value="event">Event</option>
+                <option value="exam">Exam</option>
+                <option value="assignment">Assignment</option>
+                <option value="holiday">Holiday</option>
+                <option value="deadline">Deadline</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-muted">Starts at</label>
+              <Input
+                type="datetime-local"
+                value={newEvent.startsAt}
+                onChange={(e) => setNewEvent({ ...newEvent, startsAt: e.target.value })}
+              />
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-semibold text-muted">Location</label>
-            <input
+            <Input
               value={newEvent.location}
               onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-              className="h-9 rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-primary"
+              placeholder="e.g. Auditorium, Block B"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-[10px] font-semibold text-muted">All day</label>
+          <label className="flex items-center gap-2 text-xs text-muted">
             <input
               type="checkbox"
               checked={newEvent.isAllDay}
               onChange={(e) => setNewEvent({ ...newEvent, isAllDay: e.target.checked })}
-              className="size-4 rounded border border-border bg-card"
+              className="size-4 rounded border border-border bg-card accent-primary"
             />
-          </div>
-          <div className="flex justify-end gap-2 mt-4">
+            All-day event
+          </label>
+          {formError ? <p className="rounded-xl bg-danger/10 px-3 py-2 text-xs text-danger">{formError}</p> : null}
+          <div className="mt-2 flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setOpenDialog(false)}>
               Cancel
             </Button>
-            <Button type="submit">Create Event</Button>
+            <Button type="submit">Create event</Button>
           </div>
         </form>
       </Modal>
     </div>
   );
-}
-
-function cn(...classes: (string | boolean | undefined | null)[]) {
-  return classes.filter(Boolean).join(" ");
 }

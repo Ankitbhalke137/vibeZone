@@ -18,59 +18,60 @@ datasource db {
 // ============ Identity ============
 
 model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  email        String    @unique @db.VarChar(255)
-  handle       String    @unique @db.VarChar(30)
-  name         String    @db.VarChar(100)
-  avatarUrl    String?   @map("avatar_url")
-  bio          String?   @db.VarChar(300)
-  branch       String?   @db.VarChar(50)
-  year         Int?      @db.SmallInt
-  role         String    @default("student") @db.VarChar(20) // student|senior|club_leader|moderator|faculty|admin
-  status       String    @default("active") @db.VarChar(12) // active|banned|deleted
-  expertise    Json? // senior tags: ["DSA","Placements"]
-  onboardedAt DateTime? @map("onboarded_at")
-  sessionVersion Int    @default(0) @map("session_version") // bumped by "sign out everywhere" (FR-AUTH-004)
-  lastSeenAt   DateTime? @map("last_seen_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
+  id             String    @id @default(uuid()) @db.Uuid
+  email          String    @unique @db.VarChar(255)
+  handle         String    @unique @db.VarChar(30)
+  name           String    @db.VarChar(100)
+  avatarUrl      String?   @map("avatar_url")
+  bio            String?   @db.VarChar(300)
+  branch         String?   @db.VarChar(50)
+  year           Int?      @db.SmallInt
+  role           String    @default("student") @db.VarChar(20) // student|senior|club_leader|moderator|faculty|admin
+  status         String    @default("active") @db.VarChar(12) // active|banned|deleted
+  expertise      Json? // senior tags: ["DSA","Placements"]
+  onboardedAt    DateTime? @map("onboarded_at")
+  sessionVersion Int       @default(0) @map("session_version") // bumped by "sign out everywhere" (FR-AUTH-004)
+  lastSeenAt     DateTime? @map("last_seen_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
-  announcements Announcement[]
-  eventsCreated Event[]        @relation("EventCreator")
-  eventRsvps    EventRsvp[]
-  notes         Note[]
-  noteVotes     NoteVote[]
-  messages      Message[]
-  channelMembers ChannelMember[]
-  channelsCreated Channel[]    @relation("ChannelCreator")
-  messageReportsFiled MessageReport[] @relation("ReportReporter")
-  messageReportsHandled MessageReport[] @relation("ReportHandler")
-  pollsCreated  Poll[]
-  pollVotes     PollVote[]
-  quizAttempts  QuizAttempt[]
-  pointLedger   PointLedger[]
-  feedbackReviewed Feedback[]  @relation("FeedbackReviewer")
-  lostFound     LostAndFound[]
-  mentoredAsStudent MentorshipRequest[] @relation("MentorStudent")
-  mentoredAsSenior  MentorshipRequest[] @relation("MentorSenior")
-  notifications Notification[]
-  notificationPrefs NotificationPref[]
-  pushSubscriptions PushSubscription[]
-  blockedHappenedTo BlockedUser[] @relation("BlockBlocked")
-  blockedByThem   BlockedUser[]   @relation("BlockBlocker")
-  warningsReceived UserWarning[] @relation("WarningTarget")
-  warningsIssued   UserWarning[] @relation("WarningIssuer")
-  contentReportsFiled   ContentReport[] @relation("ContentReporter")
-  contentReportsHandled ContentReport[] @relation("ContentReportHandler")
-  auditLogs     AuditLog[]
-  posts         Post[]
-  postLikes     PostLike[]
-  postComments  PostComment[]
-  postBookmarks PostBookmark[]
-  academicCalendar   AcademicCalendar[]
-  studyGroups        StudyGroup[]
-  questions          Question[]
-  answers            Answer[]
-  placementResources PlacementResource[]
+  announcements         Announcement[]
+  eventsCreated         Event[]             @relation("EventCreator")
+  eventRsvps            EventRsvp[]
+  notes                 Note[]
+  noteVotes             NoteVote[]
+  messages              Message[]
+  channelMembers        ChannelMember[]
+  channelsCreated       Channel[]           @relation("ChannelCreator")
+  messageReportsFiled   MessageReport[]     @relation("ReportReporter")
+  messageReportsHandled MessageReport[]     @relation("ReportHandler")
+  pollsCreated          Poll[]
+  pollVotes             PollVote[]
+  quizAttempts          QuizAttempt[]
+  pointLedger           PointLedger[]
+  feedbackReviewed      Feedback[]          @relation("FeedbackReviewer")
+  lostFound             LostAndFound[]
+  mentoredAsStudent     MentorshipRequest[] @relation("MentorStudent")
+  mentoredAsSenior      MentorshipRequest[] @relation("MentorSenior")
+  notifications         Notification[]
+  notificationPrefs     NotificationPref[]
+  pushSubscriptions     PushSubscription[]
+  blockedHappenedTo     BlockedUser[]       @relation("BlockBlocked")
+  blockedByThem         BlockedUser[]       @relation("BlockBlocker")
+  warningsReceived      UserWarning[]       @relation("WarningTarget")
+  warningsIssued        UserWarning[]       @relation("WarningIssuer")
+  contentReportsFiled   ContentReport[]     @relation("ContentReporter")
+  contentReportsHandled ContentReport[]     @relation("ContentReportHandler")
+  auditLogs             AuditLog[]
+  posts                 Post[]
+  postLikes             PostLike[]
+  postComments          PostComment[]
+  postBookmarks         PostBookmark[]
+  academicCalendar      AcademicCalendar[]
+  studyGroups           StudyGroup[]
+  questions             Question[]
+  answers               Answer[]
+  placementResources    PlacementResource[]
+  broadcasts            Broadcast[]
 
   @@index([role])
   @@map("users")
@@ -100,9 +101,9 @@ model Channel {
   archivedAt DateTime? @map("archived_at")
   createdAt  DateTime  @default(now()) @map("created_at")
 
-  creator    User?     @relation("ChannelCreator", fields: [createdBy], references: [id])
-  members    ChannelMember[]
-  messages   Message[]
+  creator            User?               @relation("ChannelCreator", fields: [createdBy], references: [id])
+  members            ChannelMember[]
+  messages           Message[]
   mentorshipRequests MentorshipRequest[]
 
   @@index([type])
@@ -135,8 +136,8 @@ model Message {
   deletedAt DateTime? @map("deleted_at")
   createdAt DateTime  @default(now()) @map("created_at")
 
-  channel Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  sender  User          @relation(fields: [senderId], references: [id])
+  channel Channel         @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender  User            @relation(fields: [senderId], references: [id])
   reports MessageReport[]
 
   @@index([channelId, createdAt])
@@ -165,21 +166,21 @@ model MessageReport {
 // ============ Announcements ============
 
 model Announcement {
-  id        String    @id @default(uuid()) @db.Uuid
-  title     String    @db.VarChar(160)
-  body      String    @db.Text // sanitized HTML / markdown-lite
-  category  String    @default("Academic") @db.VarChar(20)
-  imageUrl  String?   @map("image_url")
-  pinned    Boolean   @default(false)
-  notify    Boolean   @default(false)
-  viewCount Int      @default(0) @map("view_count")
-  clickCount Int     @default(0) @map("click_count")
+  id         String    @id @default(uuid()) @db.Uuid
+  title      String    @db.VarChar(160)
+  body       String    @db.Text // sanitized HTML / markdown-lite
+  category   String    @default("Academic") @db.VarChar(20)
+  imageUrl   String?   @map("image_url")
+  pinned     Boolean   @default(false)
+  notify     Boolean   @default(false)
+  viewCount  Int       @default(0) @map("view_count")
+  clickCount Int       @default(0) @map("click_count")
   notifiedAt DateTime? @map("notified_at")
   archivedAt DateTime? @map("archived_at")
-  publishAt DateTime  @default(now()) @map("publish_at")
-  expiresAt DateTime? @map("expires_at")
-  authorId  String    @map("author_id") @db.Uuid
-  createdAt DateTime  @default(now()) @map("created_at")
+  publishAt  DateTime  @default(now()) @map("publish_at")
+  expiresAt  DateTime? @map("expires_at")
+  authorId   String    @map("author_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   author User @relation(fields: [authorId], references: [id])
 
@@ -205,7 +206,7 @@ model Event {
   createdBy         String    @map("created_by") @db.Uuid
   createdAt         DateTime  @default(now()) @map("created_at")
 
-  creator User       @relation("EventCreator", fields: [createdBy], references: [id])
+  creator User        @relation("EventCreator", fields: [createdBy], references: [id])
   rsvps   EventRsvp[]
 
   @@index([startsAt])
@@ -213,11 +214,11 @@ model Event {
 }
 
 model EventRsvp {
-  eventId    String    @map("event_id") @db.Uuid
-  userId     String    @map("user_id") @db.Uuid
-  status     String    @default("going") @db.VarChar(10) // going|maybe|not_going
-  createdAt  DateTime  @default(now()) @map("created_at")
-  remindedAt DateTime? @map("reminded_at")
+  eventId      String    @map("event_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  status       String    @default("going") @db.VarChar(10) // going|maybe|not_going
+  createdAt    DateTime  @default(now()) @map("created_at")
+  remindedAt   DateTime? @map("reminded_at")
   reminded24At DateTime? @map("reminded_24_at")
   reminded1At  DateTime? @map("reminded_1_at")
 
@@ -231,20 +232,20 @@ model EventRsvp {
 // ============ Notes ============
 
 model Note {
-  id           String   @id @default(uuid()) @db.Uuid
-  title        String   @db.VarChar(160)
-  description  String?  @db.VarChar(500)
-  subject      String   @db.VarChar(80)
-  branch       String   @db.VarChar(50)
-  year         Int?     @db.SmallInt
-  semester     Int?     @db.SmallInt
-  type         String   @default("Notes") @db.VarChar(12) // Notes|PYQ|Lab|Slides|Other
-  externalLink String   @map("external_link") // enforced ^https:// via harden.sql
-  fileUrl      String?  @map("file_url") // v1.5 direct upload
-  uploadedBy   String   @map("uploaded_by") @db.Uuid
-  openCount    Int      @default(0) @map("open_count")
+  id           String    @id @default(uuid()) @db.Uuid
+  title        String    @db.VarChar(160)
+  description  String?   @db.VarChar(500)
+  subject      String    @db.VarChar(80)
+  branch       String    @db.VarChar(50)
+  year         Int?      @db.SmallInt
+  semester     Int?      @db.SmallInt
+  type         String    @default("Notes") @db.VarChar(12) // Notes|PYQ|Lab|Slides|Other
+  externalLink String    @map("external_link") // enforced ^https:// via harden.sql
+  fileUrl      String?   @map("file_url") // v1.5 direct upload
+  uploadedBy   String    @map("uploaded_by") @db.Uuid
+  openCount    Int       @default(0) @map("open_count")
   removedAt    DateTime? @map("removed_at")
-  createdAt    DateTime @default(now()) @map("created_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
 
   uploader User       @relation(fields: [uploadedBy], references: [id])
   votes    NoteVote[]
@@ -254,9 +255,9 @@ model Note {
 }
 
 model NoteVote {
-  noteId    String    @map("note_id") @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  createdAt DateTime  @default(now()) @map("created_at")
+  noteId    String   @map("note_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
 
   note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -268,15 +269,15 @@ model NoteVote {
 // ============ Polls / Games ============
 
 model Poll {
-  id        String    @id @default(uuid()) @db.Uuid
-  question  String    @db.Text
-  options   Json // ["Option A","Option B"]
-  status    String    @default("draft") @db.VarChar(12) // draft|scheduled|open|closed
-  opensAt   DateTime? @map("opens_at")
-  closesAt  DateTime? @map("closes_at")
+  id         String    @id @default(uuid()) @db.Uuid
+  question   String    @db.Text
+  options    Json // ["Option A","Option B"]
+  status     String    @default("draft") @db.VarChar(12) // draft|scheduled|open|closed
+  opensAt    DateTime? @map("opens_at")
+  closesAt   DateTime? @map("closes_at")
   notifiedAt DateTime? @map("notified_at")
-  createdBy String?   @map("created_by") @db.Uuid
-  createdAt DateTime  @default(now()) @map("created_at")
+  createdBy  String?   @map("created_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   creator User?      @relation(fields: [createdBy], references: [id])
   votes   PollVote[]
@@ -400,8 +401,8 @@ model MentorshipRequest {
   createdAt   DateTime  @default(now()) @map("created_at")
   respondedAt DateTime? @map("responded_at")
 
-  student User    @relation("MentorStudent", fields: [studentId], references: [id])
-  senior  User    @relation("MentorSenior", fields: [seniorId], references: [id])
+  student User     @relation("MentorStudent", fields: [studentId], references: [id])
+  senior  User     @relation("MentorSenior", fields: [seniorId], references: [id])
   channel Channel? @relation(fields: [channelId], references: [id])
 
   @@index([seniorId, status])
@@ -427,11 +428,11 @@ model Notification {
 }
 
 model NotificationPref {
-  userId       String   @map("user_id") @db.Uuid
-  category     String   @db.VarChar(24)
-  pushEnabled  Boolean  @default(true) @map("push_enabled")
-  inappEnabled Boolean  @default(true) @map("inapp_enabled")
-  emailEnabled Boolean  @default(false) @map("email_enabled")
+  userId       String  @map("user_id") @db.Uuid
+  category     String  @db.VarChar(24)
+  pushEnabled  Boolean @default(true) @map("push_enabled")
+  inappEnabled Boolean @default(true) @map("inapp_enabled")
+  emailEnabled Boolean @default(false) @map("email_enabled")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -518,7 +519,7 @@ model Post {
   updatedAt  DateTime  @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
-  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   likes     PostLike[]
   comments  PostComment[]
   bookmarks PostBookmark[]
@@ -548,8 +549,8 @@ model PostComment {
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([postId, createdAt])
   @@map("post_comments")
@@ -586,16 +587,16 @@ model AuditLog {
 // ============ Academic Calendar ============
 
 model AcademicCalendar {
-  id         String   @id @default(uuid()) @db.Uuid
-  title      String   @db.VarChar(200)
-  description String? @db.Text
-  category   String   @db.VarChar(20) // exam|assignment|holiday|event|deadline
-  startsAt   DateTime @map("starts_at")
-  endsAt     DateTime? @map("ends_at")
-  location   String?  @db.VarChar(200)
-  isAllDay   Boolean   @default(false) @map("is_all_day")
-  createdBy  String   @map("created_by") @db.Uuid
-  createdAt  DateTime @default(now()) @map("created_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String    @db.VarChar(200)
+  description String?   @db.Text
+  category    String    @db.VarChar(20) // exam|assignment|holiday|event|deadline
+  startsAt    DateTime  @map("starts_at")
+  endsAt      DateTime? @map("ends_at")
+  location    String?   @db.VarChar(200)
+  isAllDay    Boolean   @default(false) @map("is_all_day")
+  createdBy   String    @map("created_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   creator User @relation(fields: [createdBy], references: [id])
 
@@ -606,40 +607,36 @@ model AcademicCalendar {
 // ============ Study Groups ============
 
 model StudyGroup {
-  id         String   @id @default(uuid()) @db.Uuid
-  title      String   @db.VarChar(100)
-  description String? @db.Text
-  subject    String   @db.VarChar(100)
-  branch     String? @db.VarChar(50)
-  year       Int?     @db.SmallInt
-  maxMembers Int?     @db.SmallInt @default(20)
-  createdBy  String   @map("created_by") @db.Uuid
-  createdAt  DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(100)
+  description String?  @db.Text
+  subject     String   @db.VarChar(100)
+  branch      String?  @db.VarChar(50)
+  year        Int?     @db.SmallInt
+  maxMembers  Int?     @default(20) @db.SmallInt
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  creator   User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  creator User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 
   @@map("study_groups")
 }
 
-
-
-
-
 // ============ Campus Q&A ============
 
 model Question {
-  id         String   @id @default(uuid()) @db.Uuid
-  title      String   @db.VarChar(200)
-  body       String   @db.Text
-  category   String   @db.VarChar(50) @default("general")
-  tags       String[] @default([])
-  authorId   String   @map("author_id") @db.Uuid
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id         String    @id @default(uuid()) @db.Uuid
+  title      String    @db.VarChar(200)
+  body       String    @db.Text
+  category   String    @default("general") @db.VarChar(50)
+  tags       String[]  @default([])
+  authorId   String    @map("author_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
   resolvedAt DateTime? @map("resolved_at")
 
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  answers  Answer[]
+  author  User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  answers Answer[]
 
   @@index([createdAt(sort: Desc)])
   @@map("questions")
@@ -650,12 +647,12 @@ model Answer {
   questionId String   @map("question_id") @db.Uuid
   authorId   String   @map("author_id") @db.Uuid
   body       String   @db.Text
-  isAccepted Boolean   @default(false) @map("is_accepted")
+  isAccepted Boolean  @default(false) @map("is_accepted")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@map("answers")
 }
@@ -663,17 +660,38 @@ model Answer {
 // ============ Placement Resources ============
 
 model PlacementResource {
-  id         String   @id @default(uuid()) @db.Uuid
-  title      String   @db.VarChar(200)
-  company    String   @db.VarChar(100)
-  description String? @db.Text
-  category   String   @db.VarChar(50) // internship|full-time|resource|event
-  url        String?  @db.VarChar(500)
-  tags       String[] @default([])
-  createdBy  String   @map("created_by") @db.Uuid
-  createdAt  DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(200)
+  company     String   @db.VarChar(100)
+  description String?  @db.Text
+  category    String   @db.VarChar(50) // internship|full-time|resource|event
+  url         String?  @db.VarChar(500)
+  tags        String[] @default([])
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
 
   creator User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 
   @@map("placement_resources")
+}
+
+// ============ Broadcast Video Streaming ============
+
+model Broadcast {
+  id           String    @id @default(uuid()) @db.Uuid
+  title        String    @db.VarChar(160)
+  description  String?   @db.Text
+  streamUrl    String    @map("stream_url") @db.VarChar(500) // YouTube / HLS embed URL
+  thumbnailUrl String?   @map("thumbnail_url") @db.VarChar(500)
+  status       String    @default("upcoming") @db.VarChar(12) // live|upcoming|ended
+  startsAt     DateTime  @map("starts_at")
+  endsAt       DateTime? @map("ends_at")
+  viewerCount  Int       @default(0) @map("viewer_count")
+  hostedBy     String    @map("hosted_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  host User @relation(fields: [hostedBy], references: [id])
+
+  @@index([status, startsAt])
+  @@map("broadcasts")
 }
