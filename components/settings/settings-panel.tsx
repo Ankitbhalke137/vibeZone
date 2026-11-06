@@ -33,7 +33,7 @@ export function SettingsPanel({ user }: { user: User }) {
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(true);
 
   useEffect(() => setMounted(true), []);
 
