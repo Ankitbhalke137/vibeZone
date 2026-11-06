@@ -13,7 +13,7 @@ export function sanitizeBody(input: string): string {
       "a", "h3", "h4", "blockquote", "code", "pre", "span", "hr",
     ],
     allowedAttributes: {
-      a: ["href", "title"],
+      a: ["href", "title", "target", "rel"],
       span: ["class"],
     },
     allowedSchemes: ["https", "mailto"],

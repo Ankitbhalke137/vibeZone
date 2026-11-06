@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/ui/motion";
 import {
   ArrowRight,
   BellRing,
@@ -22,6 +22,7 @@ import {
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getDashboardData } from "@/lib/dashboard-data";
+import { getDailyDrop } from "@/lib/daily-drop";
 import { listPosts } from "@/lib/posts";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -55,8 +56,9 @@ export default async function HomePage() {
   const data = await getDashboardData();
   if (!data) redirect("/login?next=/home");
 
-  const [feed, people] = await Promise.all([
+  const [feed, drop, people] = await Promise.all([
     listPosts({ viewerId: me.id, take: 10, limitComments: 2 }),
+    getDailyDrop(),
     db.user
       .findMany({
         where: { id: { not: me.id }, status: "active" },
@@ -163,34 +165,34 @@ export default async function HomePage() {
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <motion.div
+                  <MotionDiv
                     whileInView={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: 12 }}
                     transition={{ duration: 0.4 }}
                   >
                     <HeroStat icon={Sparkles} label="Level" value={`${data.stats.level}`} hint={data.stats.levelName} />
-                  </motion.div>
-                  <motion.div
+                  </MotionDiv>
+                  <MotionDiv
                     whileInView={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: 12 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
                   >
                     <HeroStat icon={Trophy} label="Points" value={data.stats.xp.toLocaleString("en-IN")} hint={`${data.stats.xpToNext} to next`} />
-                  </motion.div>
-                  <motion.div
+                  </MotionDiv>
+                  <MotionDiv
                     whileInView={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: 12 }}
                     transition={{ duration: 0.4, delay: 0.2 }}
                   >
                     <HeroStat icon={Trophy} label="Rank" value={data.stats.rank ? `#${data.stats.rank}` : "—"} hint="This week" />
-                  </motion.div>
-                  <motion.div
+                  </MotionDiv>
+                  <MotionDiv
                     whileInView={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: 12 }}
                     transition={{ duration: 0.4, delay: 0.3 }}
                   >
                     <HeroStat icon={Flame} label="Streak" value={`${data.stats.streak}d`} hint={data.stats.streak > 0 ? "Keep it going" : "Start today"} />
-                  </motion.div>
+                  </MotionDiv>
                 </div>
 
                 <div className="mt-3">
@@ -268,7 +270,7 @@ export default async function HomePage() {
         {/* Quick access — glass cards with stagger */}
         <section className="vz-stagger-appear grid grid-cols-2 gap-2 sm:grid-cols-4">
           {quick.map((item, index) => (
-            <motion.div
+            <MotionDiv
               key={item.href}
               whileInView={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 12 }}
@@ -287,7 +289,7 @@ export default async function HomePage() {
                 </span>
                 <ChevronRight size={13} className="ml-auto hidden shrink-0 text-muted-2 transition group-hover:text-primary sm:block" />
               </Link>
-            </motion.div>
+            </MotionDiv>
           ))}
         </section>
 
@@ -311,7 +313,7 @@ export default async function HomePage() {
       {/* Right rail */}
       <aside className="flex min-w-0 flex-col gap-3">
         {people.length > 0 ? (
-          <motion.div
+          <MotionDiv
             whileInView={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.4 }}
@@ -348,11 +350,11 @@ export default async function HomePage() {
                 ))}
               </ul>
             </section>
-          </motion.div>
+          </MotionDiv>
         ) : null}
 
         {/* Announcements */}
-        <motion.div
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.1 }}
@@ -392,10 +394,10 @@ export default async function HomePage() {
             </ul>
           )}
           </section>
-        </motion.div>
+        </MotionDiv>
 
         {/* Events */}
-        <motion.div
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.15 }}
@@ -441,12 +443,12 @@ export default async function HomePage() {
             </ul>
           )}
           </section>
-        </motion.div>
+        </MotionDiv>
 
         <PollWidget poll={data.poll} />
 
         {/* Notes */}
-        <motion.div
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.2 }}
@@ -490,10 +492,10 @@ export default async function HomePage() {
             </ul>
           )}
           </section>
-        </motion.div>
+        </MotionDiv>
 
         {/* Lost & found */}
-        <motion.div
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.25 }}
@@ -538,10 +540,10 @@ export default async function HomePage() {
             </ul>
           )}
           </section>
-        </motion.div>
+        </MotionDiv>
 
         {/* Mentors */}
-        <motion.div
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -587,10 +589,10 @@ export default async function HomePage() {
             </ul>
           )}
           </section>
-        </motion.div>
+        </MotionDiv>
 
         {/* Chat */}
-        <motion.div
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.35 }}
@@ -640,9 +642,34 @@ export default async function HomePage() {
             </div>
           )}
           </section>
-        </motion.div>
+        </MotionDiv>
 
-        <motion.div
+        <MotionDiv
+          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <section className="vz-glass-card p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-[11px] font-bold">
+                <Sparkles size={13} className="text-primary" /> Daily drop
+              </div>
+              <span className="text-[9px] text-muted-2">{drop.source}</span>
+            </div>
+            <p className="mt-2 text-[11.5px] font-semibold leading-snug">{drop.setup}</p>
+            {drop.punchline ? (
+              <p className="mt-1 text-[11px] leading-relaxed text-muted">{drop.punchline}</p>
+            ) : null}
+            <Link
+              href="/games"
+              className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+            >
+              Play the weekly quiz <ArrowRight size={10} />
+            </Link>
+          </section>
+        </MotionDiv>
+
+        <MotionDiv
           whileInView={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.4, delay: 0.4 }}
@@ -661,7 +688,7 @@ export default async function HomePage() {
               View leaderboard <ArrowRight size={10} />
             </Link>
           </section>
-        </motion.div>
+        </MotionDiv>
       </aside>
     </div>
   );

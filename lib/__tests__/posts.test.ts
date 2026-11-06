@@ -14,7 +14,7 @@ const SAFE_TAG = fc.string({ minLength: 1, maxLength: 20 }).filter((s) => s.trim
 const FIXED_DATE = new Date("2026-01-15T12:00:00Z");
 
 function randomAuthorArb() {
-  return fc.object({
+  return fc.record({
     id: SAFE_ID,
     name: fc.string({ minLength: 1, maxLength: 100 }).filter((s) => s.trim().length > 0),
     handle: fc.string({ minLength: 3, maxLength: 30 }).filter((s) => s.trim().length > 0),
@@ -39,7 +39,7 @@ describe("serialize", () => {
         fc.boolean(),
         fc.boolean(),
         fc.array(
-          fc.object({
+          fc.record({
             id: SAFE_ID,
             body: fc.string({ minLength: 1, maxLength: 500 }).filter((s) => s.trim().length > 0),
             author: randomAuthorArb(),

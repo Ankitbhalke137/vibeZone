@@ -9,7 +9,7 @@ const COOKIE = "vz_session";
  * Public surfaces stay open: `/` (landing), `/login`, and the anonymous
  * feedback page. Everything inside the campus shell requires a valid session.
  */
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const token = req.cookies.get(COOKIE)?.value;
   let ok = false;
 
@@ -46,12 +46,17 @@ export const config = {
     "/admin/:path*",
     "/chat/:path*",
     "/u/:path*",
-    "/announcements/:path*",
     "/events/:path*",
     "/notes/:path*",
     "/polls/:path*",
     "/leaderboard/:path*",
     "/lost-and-found/:path*",
     "/mentorship/:path*",
+    "/calendar/:path*",
+    "/questions/:path*",
+    "/study-groups/:path*",
+    "/placements/:path*",
+    "/live/:path*",
+    "/games/:path*",
   ],
 };

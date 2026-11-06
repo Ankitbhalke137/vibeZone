@@ -26,8 +26,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 50,
       include: {
-        creator: { select: { id: true, name: true, handle: true } },
-        _count: { select: { members: true } },
+        creator: { select: { id: true, name: true, handle: true, avatarUrl: true } },
       },
     });
 
@@ -54,11 +53,10 @@ export async function POST(req: Request) {
         branch: body.branch,
         year: body.year,
         maxMembers: body.maxMembers,
-        creatorId: user.id,
+        createdBy: user.id,
       },
       include: {
-        creator: { select: { id: true, name: true, handle: true } },
-        _count: { select: { members: true } },
+        creator: { select: { id: true, name: true, handle: true, avatarUrl: true } },
       },
     });
 

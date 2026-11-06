@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/ui/motion";
 import {
   ArrowRight,
   Hash,
@@ -127,7 +127,7 @@ export default async function ChatPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
         <div className="flex min-w-0 flex-col gap-3">
           <section className="grid gap-2.5 sm:grid-cols-3">
-            <motion.div
+            <MotionDiv
               whileInView={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.4 }}
@@ -138,8 +138,8 @@ export default async function ChatPage() {
                 value={channelCount}
                 tone="bg-primary/10 text-primary"
               />
-            </motion.div>
-            <motion.div
+            </MotionDiv>
+            <MotionDiv
               whileInView={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.4, delay: 0.1 }}
@@ -150,8 +150,8 @@ export default async function ChatPage() {
                 value={dmCount}
                 tone="bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400"
               />
-            </motion.div>
-            <motion.div
+            </MotionDiv>
+            <MotionDiv
               whileInView={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.4, delay: 0.2 }}
@@ -162,7 +162,7 @@ export default async function ChatPage() {
                 value={totalUnread}
                 tone="bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
               />
-            </motion.div>
+            </MotionDiv>
           </section>
 
           <ChatDirectory items={items} />

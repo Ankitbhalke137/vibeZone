@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/ui/motion";
 import {
   ArrowRight,
   BookOpen,
@@ -135,7 +135,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <motion.div
+        <MotionDiv
           initial={cardVariants.hidden}
           animate={cardVariants.visible}
           className="flex min-w-0 flex-col gap-3"
@@ -157,10 +157,10 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
                 : "When they post to campus, their updates will appear here."
             }
           />
-        </motion.div>
+        </MotionDiv>
 
         <aside className="flex min-w-0 flex-col gap-3">
-          <motion.div
+          <MotionDiv
             initial={cardVariants.hidden}
             animate={cardVariants.visible}
             transition={{ delay: 0.1 }}
@@ -215,10 +215,10 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
                 </div>
               </div>
             ) : null}
-          </motion.div>
+          </MotionDiv>
 
           {!isMe ? (
-            <motion.div
+            <MotionDiv
               initial={cardVariants.hidden}
               animate={cardVariants.visible}
               transition={{ delay: 0.2 }}
@@ -236,11 +236,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
               <div className="mt-3">
                 <DmButton userId={user.id} label={`Message ${user.name.split(" ")[0]}`} />
               </div>
-            </motion.div>
+            </MotionDiv>
           ) : null}
 
           {similar.length > 0 ? (
-            <motion.div
+            <MotionDiv
               initial={cardVariants.hidden}
               animate={cardVariants.visible}
               transition={{ delay: 0.3 }}
@@ -279,7 +279,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ ha
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </MotionDiv>
           ) : null}
 
           <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4">
