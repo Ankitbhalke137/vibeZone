@@ -39,6 +39,7 @@ model User {
   eventRsvps            EventRsvp[]
   notes                 Note[]
   noteVotes             NoteVote[]
+  noteReviews           NoteReview[]
   messages              Message[]
   channelMembers        ChannelMember[]
   channelsCreated       Channel[]           @relation("ChannelCreator")
@@ -251,6 +252,7 @@ model Note {
 
   uploader User       @relation(fields: [uploadedBy], references: [id])
   votes    NoteVote[]
+  reviews  NoteReview[]
 
   @@index([subject, branch, year])
   @@map("notes")
@@ -266,6 +268,24 @@ model NoteVote {
 
   @@id([noteId, userId])
   @@map("note_votes")
+}
+
+// ============ Note Reviews & Ratings ============
+
+model NoteReview {
+  id        String   @id @default(uuid()) @db.Uuid
+  noteId    String   @map("note_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  rating    Int      @map("rating") @db.SmallInt // 1-5 stars
+  comment   String?  @map("comment") @db.Text // optional written review
+  createdAt DateTime @default(now()) @map("created_at")
+
+  note Note  @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, userId]) // one review per user per note
+  @@index([noteId])
+  @@map("note_reviews")
 }
 
 // ============ Polls / Games ============

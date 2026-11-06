@@ -10,10 +10,12 @@ import {
   Loader2,
   Plus,
   Search,
+  Star,
   ThumbsUp,
 } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { FormError, Input, Label, Select, Textarea } from "@/components/ui/form";
 import { Modal } from "@/components/ui/modal";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -37,12 +39,28 @@ type Note = {
   externalLink: string;
   openCount: number;
   voteCount: number;
+  reviewCount: number;
+  avgRating: number;
   uploadedBy: string;
   uploadedByHandle: string;
   createdAt: string;
 };
 
 type Me = { id: string; name: string; handle: string } | null;
+
+function StarRating({ rating, size = 12, className }: { rating: number; size?: number; className?: string }) {
+  const full = Math.floor(rating);
+  const hasHalf = rating % 1 !== 0;
+  return (
+    <div className={cn("flex items-center gap-0.5", className)}>
+      {[1, 2, 3, 4, 5].map((i) => {
+        if (i <= full) return <Star key={i} size={size} className="text-warning fill-warning" />;
+        if (i === full + 0.5 && hasHalf) return <Star key={i} size={size} className="text-warning fill-warning/50" />;
+        return <Star key={i} size={size} className="text-muted-2" />;
+      })}
+    </div>
+  );
+}
 
 export default function NotesPage() {
   return (
@@ -67,6 +85,7 @@ function NotesView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openForm, setOpenForm] = useState(false);
+  const [reviewNote, setReviewNote] = useState<Note | null>(null);
 
   const fetchNotes = useCallback(async () => {
     setLoading(true);
@@ -121,7 +140,7 @@ function NotesView() {
     window.open(note.externalLink, "_blank", "noopener,noreferrer");
   }
 
-  return (
+    return (
     <div className="flex flex-col gap-4">
       <PageHeader
         eyebrow="Knowledge base"
@@ -227,6 +246,16 @@ function NotesView() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setReviewNote(n)}
+                  className="inline-flex items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold text-warning transition hover:bg-warning/10"
+                  aria-label="Rate & review"
+                >
+                  <StarRating rating={n.avgRating} size={10} />
+                  <span className="font-bold">{n.avgRating.toFixed(1)}</span>
+                  <span className="text-muted-2">({n.reviewCount})</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => void openLink(n)}
                   className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary transition hover:bg-primary/15"
                 >
@@ -246,6 +275,17 @@ function NotesView() {
           setOpenForm(false);
           void fetchNotes();
           router.refresh();
+        }}
+      />
+
+      <NoteReviewModal
+        open={reviewNote !== null}
+        note={reviewNote}
+        me={me}
+        onClose={() => setReviewNote(null)}
+        onReviewed={() => {
+          setReviewNote(null);
+          void fetchNotes();
         }}
       />
     </div>
@@ -388,6 +428,170 @@ function NoteForm({
             {busy ? "Publishing…" : "Publish resource"}
           </Button>
         </form>
+      )}
+    </Modal>
+  );
+}
+
+function NoteReviewModal({
+  open,
+  note,
+  me,
+  onClose,
+  onReviewed,
+}: {
+  open: boolean;
+  note: Note | null;
+  me: Me | null;
+  onClose: () => void;
+  onReviewed: () => void;
+}) {
+  const { toast } = useToast();
+  const [reviews, setReviews] = useState<Array<{ id: string; rating: number; comment: string | null; createdAt: string; user: { id: string; name: string; handle: string; year: number | null; branch: string | null } }>>([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+  const [myRating, setMyRating] = useState(0);
+  const [myComment, setMyComment] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [hover, setHover] = useState(0);
+
+  useEffect(() => {
+    if (!note) return;
+    fetch(`/api/notes/${note.id}/reviews`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d) {
+          setReviews(d.reviews);
+          setAvgRating(d.avgRating);
+          setReviewCount(d.reviewCount);
+        }
+      })
+      .catch(() => {});
+  }, [note]);
+
+  function StarRatingPicker({ value, onSelect, size = 20 }: { value: number; onSelect: (v: number) => void; size?: number }) {
+    return (
+      <div
+        className="flex items-center gap-1"
+        onMouseLeave={() => onSelect(value)}
+      >
+        {[1, 2, 3, 4, 5].map((i) => (
+          <button
+            key={i}
+            type="button"
+            onMouseEnter={() => onSelect(i)}
+            onClick={() => onSelect(i)}
+            className="p-0"
+          >
+            <Star
+              size={size}
+              className={cn(
+                "transition",
+                i <= (hover || value) ? "text-warning fill-warning" : "text-muted-2 hover:text-warning",
+              )}
+            />
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  async function submitReview() {
+    if (!me || !note) return;
+    if (myRating < 1 || myRating > 5) {
+      toast({ title: "Please select a rating", tone: "error" });
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/notes/${note.id}/reviews`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ rating: myRating, comment: myComment.trim() || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Review failed.");
+      toast({ title: "Review submitted — thanks!", tone: "success" });
+      onReviewed();
+      onClose();
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : "Review failed.", tone: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!open || !note) return null;
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={`Rate "${note.title}"`}
+      description={`Help other students by rating this ${note.type.toLowerCase()}.`}
+    >
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col items-center gap-2">
+          <StarRatingPicker value={myRating || 0} onSelect={setMyRating} size={24} />
+          <p className="text-[12px] text-muted">
+            {myRating > 0 ? `${myRating}/5 stars` : "Select a rating"}
+          </p>
+        </div>
+
+        <div>
+          <Label htmlFor="rr-comment">Review (optional)</Label>
+          <Textarea
+            id="rr-comment"
+            rows={3}
+            maxLength={1000}
+            value={myComment}
+            onChange={(e) => setMyComment(e.target.value)}
+            placeholder="What was helpful? Any suggestions?"
+          />
+        </div>
+
+        <div className="mt-2 border-t border-border pt-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-muted">
+              {reviewCount} review{reviewCount !== 1 ? "s" : ""}
+            </span>
+            <StarRating rating={avgRating} size={12} className="ml-1" />
+            <span className="text-[11px] font-bold text-muted">{avgRating.toFixed(1)}</span>
+          </div>
+          <Button type="button" onClick={submitReview} disabled={busy || myRating < 1}>
+            {busy ? "Submitting…" : "Submit review"}
+          </Button>
+        </div>
+      </div>
+
+      {reviews.length > 0 && (
+        <div className="mt-4 border-t border-border pt-3 max-h-60 overflow-y-auto">
+          <h3 className="text-[11px] font-bold uppercase tracking-wide text-muted mb-2">
+            Student reviews
+          </h3>
+          <div className="space-y-2">
+            {reviews.map((r) => (
+              <div key={r.id} className="flex flex-col gap-1">
+                <div className="flex items-center gap-1.5">
+                  <Avatar name={r.user.name} handle={r.user.handle} size="xs" />
+                  <span className="text-[10px] font-semibold">{r.user.name}</span>
+                  <span className="text-[10px] text-muted">
+                    {r.user.year ? `Y${r.user.year}` : "N/A"} · {r.user.branch}
+                  </span>
+                  <span className="ml-auto text-[10px] text-muted">
+                    {new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                  </span>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  <StarRating rating={r.rating} size={11} />
+                </div>
+                {r.comment && (
+                  <p className="text-[10.5px] leading-relaxed text-muted">{r.comment}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </Modal>
   );
