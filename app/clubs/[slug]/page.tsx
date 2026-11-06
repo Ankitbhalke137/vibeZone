@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -28,7 +28,7 @@ export default async function ClubPage({ params }: { params: Promise<{ slug: str
       },
       applications: {
         orderBy: [{ createdAt: "desc" }],
-        select: { positionId: true, id: true },
+        select: { positionId: true, userId: true },
       },
     },
   });
@@ -36,8 +36,13 @@ export default async function ClubPage({ params }: { params: Promise<{ slug: str
   if (!club || club.status !== "active") notFound();
 
   const me = await getCurrentUser();
+  // Only the signed-in student's own applications count — never another user's.
   const alreadyApplied = new Set(
-    club.applications?.map((a: any) => a.positionId) || [],
+    me
+      ? club.applications
+          .filter((a) => a.userId === me.id)
+          .map((a) => a.positionId)
+      : [],
   );
 
   const openPositions = club.positions.filter((p) => p.status === "open");

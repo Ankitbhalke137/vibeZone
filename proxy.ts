@@ -58,7 +58,7 @@ export const config = {
     "/lost-and-found/:path*",
     "/mentorship/:path*",
     "/calendar/:path*",
-    "/clubs/[slug]/positions/:path*/apply",
+    "/clubs/:slug/positions/:pid/apply",
     "/my-club-applications/:path*",
     "/questions/:path*",
     "/study-groups/:path*",

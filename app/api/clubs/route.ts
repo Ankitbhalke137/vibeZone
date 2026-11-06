@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser, hasRole, type SafeUser } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { apiError, assertSameOrigin, parseJson } from "@/lib/api";
 import { audit } from "@/lib/audit";
 

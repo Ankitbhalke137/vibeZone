@@ -38,3 +38,6 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# local scratch scripts — may contain dev credentials, never commit
+/test-clubs.mjs

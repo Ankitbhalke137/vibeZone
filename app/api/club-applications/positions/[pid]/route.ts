@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { isUuid } from "@/lib/uuid";
+import { getCurrentUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +26,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ pid: str
       return NextResponse.json({ error: "Position not found." }, { status: 404 });
     }
 
+    // Optional auth: tell the page whether this student already applied.
+    const me = await getCurrentUser();
+    const existing = me
+      ? await db.clubApplication.findUnique({
+          where: { positionId_userId: { positionId: pid, userId: me.id } },
+          select: { id: true },
+        })
+      : null;
+
     return NextResponse.json({
       position: {
         id: position.id,
@@ -33,6 +43,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ pid: str
         description: position.description,
         status: position.status,
         applicationCount: position._count.applications,
+        applied: !!existing,
       },
       club: {
         id: position.club.id,
