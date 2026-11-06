@@ -27,7 +27,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
-        initial={false}
+        initial={pageVariants.initial}
         animate={pageVariants.animate}
         exit={pageVariants.exit}
         className="min-h-dvh"
