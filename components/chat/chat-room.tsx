@@ -186,7 +186,7 @@ export function ChatRoom({
     let cancelled = false;
     const tick = async () => {
       try {
-        const res = await fetch(`/api/v1/channels/${channel.id}/messages?limit=50`, {
+        const res = await fetch(`/api/channels/${channel.id}/messages?limit=50`, {
           cache: "no-store",
         });
         if (!res.ok) return;
@@ -247,7 +247,6 @@ export function ChatRoom({
       setMessages((cur) => cur.filter((m) => m.id !== tempId));
       mergeMessages([data.message]);
       ga.messageSend(channel.type, aliasActive);
-      router.refresh();
     } catch (err) {
       setMessages((cur) => cur.filter((m) => m.id !== tempId));
       setBody(text);

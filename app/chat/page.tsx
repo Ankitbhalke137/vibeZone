@@ -120,7 +120,7 @@ export default async function ChatPage() {
       />
 
       {/* Hero with 3D campus orbit (desktop) */}
-      <div className="lg:block h-[200px] mb-4">
+      <div className="lg:block mb-4">
         <CampusOrbit />
       </div>
 
