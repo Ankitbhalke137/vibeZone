@@ -19,6 +19,7 @@ export function CampusOrbit() {
       <Canvas
         camera={{ position: [0, 0, 8], fov: 40 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        className="absolute inset-0 w-full h-full"
       >
         <ambientLight intensity={0.8} />
         <pointLight position={[5, 5, 8]} intensity={1} color="#7047f5" />
