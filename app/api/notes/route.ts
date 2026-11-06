@@ -47,26 +47,39 @@ export async function GET(req: Request) {
       },
       orderBy: f.sort === "top" ? [{ openCount: "desc" }] : [{ createdAt: "desc" }],
       take: 50,
-      include: { _count: { select: { votes: true } }, uploader: { select: { name: true, handle: true } } },
+      include: {
+        _count: { select: { votes: true, reviews: true } },
+        reviews: { select: { rating: true } },
+        uploader: { select: { name: true, handle: true } },
+      },
     });
 
     return NextResponse.json({
-      notes: notes.map((n) => ({
-        id: n.id,
-        title: n.title,
-        description: n.description,
-        subject: n.subject,
-        branch: n.branch,
-        year: n.year,
-        semester: n.semester,
-        type: n.type,
-        externalLink: n.externalLink,
-        openCount: n.openCount,
-        voteCount: n._count.votes,
-        uploadedBy: n.uploader.name,
-        uploadedByHandle: n.uploader.handle,
-        createdAt: n.createdAt.toISOString(),
-      })),
+      notes: notes.map((n) => {
+        const ratings = n.reviews.map((r) => r.rating);
+        const avgRating =
+          ratings.length > 0
+            ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+            : 0;
+        return {
+          id: n.id,
+          title: n.title,
+          description: n.description,
+          subject: n.subject,
+          branch: n.branch,
+          year: n.year,
+          semester: n.semester,
+          type: n.type,
+          externalLink: n.externalLink,
+          openCount: n.openCount,
+          voteCount: n._count.votes,
+          reviewCount: n._count.reviews,
+          avgRating,
+          uploadedBy: n.uploader.name,
+          uploadedByHandle: n.uploader.handle,
+          createdAt: n.createdAt.toISOString(),
+        };
+      }),
     });
   } catch (e) {
     return apiError(e);

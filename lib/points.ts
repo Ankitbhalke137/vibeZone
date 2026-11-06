@@ -19,6 +19,7 @@ export const POINTS = {
   attend_event: { points: 15, cap: null },
   note_upload: { points: 10, cap: 3 },
   note_upvote: { points: 1, cap: 5 },
+  note_review: { points: 5, cap: null },
   note_upvoted: { points: 2, cap: 10 },
   lostfound_post: { points: 5, cap: 1 },
   post_create: { points: 2, cap: 5 },

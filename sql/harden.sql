@@ -114,3 +114,10 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE INDEX IF NOT EXISTS idx_club_pos_holder ON club_positions (holder_id);
+
+DO $$ BEGIN
+  ALTER TABLE note_reviews ADD CONSTRAINT note_reviews_rating_chk
+    CHECK (rating BETWEEN 1 AND 5);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+CREATE INDEX IF NOT EXISTS idx_note_reviews_note ON note_reviews (note_id);
