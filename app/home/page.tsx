@@ -124,7 +124,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 z-0 rounded-2xl bg-[var(--vz-card-2)] border border-[var(--vz-border)]" />
           <div className="relative z-10">
             {/* Desktop: 3D orbit */}
-            <div className="hidden lg:block h-[200px] mb-6">
+            <div className="hidden lg:block mb-6">
               <CampusOrbit />
             </div>
             {/* Mobile: gradient hero */}
