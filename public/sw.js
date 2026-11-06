@@ -46,3 +46,52 @@ self.addEventListener("fetch", (event) => {
     }),
   );
 });
+
+// Push: show a notification when the server sends a push
+self.addEventListener("push", (event) => {
+  let data = { title: "VibeZone", body: "You have a new notification.", url: "/notifications" };
+
+  try {
+    data = event.data ? event.data.json() : data;
+  } catch {
+    // use default
+  }
+
+  const options = {
+    body: data.body || "",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: data.tag || "vibezone",
+    data: { url: data.url || "/notifications" },
+    requireInteraction: false,
+    vibrate: [100, 50, 100],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options),
+  );
+});
+
+// Notification click: open the app at the notification's URL
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data && event.notification.data.url
+    ? event.notification.data.url
+    : "/notifications";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      // Focus an existing tab if one is open on the same origin
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      // Otherwise open a new tab
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(url);
+      }
+    }),
+  );
+});
