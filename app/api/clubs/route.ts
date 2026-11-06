@@ -45,8 +45,8 @@ export async function GET(req: Request) {
         positions: {
           where: { status: "open" },
           orderBy: [{ title: "asc" }],
+          include: { holder: { select: { name: true, handle: true } } },
         },
-        _count: { select: { applications: true } },
       },
     });
 
@@ -66,8 +66,8 @@ export async function GET(req: Request) {
           eligibleYear: p.eligibleYear,
           description: p.description,
           status: p.status,
+          holder: p.holder,
         })),
-        applicationCount: c._count.applications,
       })),
     });
   } catch (e) {

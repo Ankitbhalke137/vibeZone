@@ -21,12 +21,8 @@ const CLUB_META: Record<string, { color: string; Icon: React.ElementType }> = {
   "social-welfare": { color: "fuchsia", Icon: HeartHandshake },
 };
 
-export default async function ClubsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
-  const { category } = await searchParams;
+export default async function ClubsPage({ searchParams }: { searchParams: { category?: string } }) {
+  const category = searchParams.category;
 
   let clubs = await db.club.findMany({
     where: {
@@ -38,8 +34,9 @@ export default async function ClubsPage({
       positions: {
         where: { status: "open" },
         orderBy: [{ title: "asc" }],
+        include: { holder: { select: { name: true, handle: true } } },
       },
-      _count: { select: { applications: true } },
+      _count: { select: { positions: true } },
     },
   });
 
@@ -113,6 +110,7 @@ function ClubCard({ club }: { club: any }) {
   const Icon = meta ? meta.Icon : Users;
   const tone = meta ? meta.color : "violet";
   const openCount = club.positions.filter((p: any) => p.status === "open").length;
+  const filledCount = club._count.positions - openCount;
 
   return (
     <Link
@@ -146,7 +144,7 @@ function ClubCard({ club }: { club: any }) {
           )}
         </div>
         <div className="mt-auto flex items-center justify-between text-[10px] font-medium text-muted">
-          <span>{club._count.applications} applied</span>
+          <span>{filledCount} filled · {openCount} open</span>
           <span className="text-primary">
             View positions <span aria-hidden="true">→</span>
           </span>
@@ -160,8 +158,12 @@ function PositionPill({ position }: { position: any }) {
   const eligible =
     position.eligibleYear === null ? "All years" : `20${30 - position.eligibleYear} Batch`;
   return (
-    <Badge tone="neutral" className="text-[8px]">
+    <Badge
+      tone={position.holder ? "green" : "neutral"}
+      className="text-[8px] uppercase"
+    >
       {position.title} · {eligible}
+      {position.holder ? ` · held by ${position.holder.name}` : ""}
     </Badge>
   );
 }
