@@ -72,9 +72,8 @@ model User {
   answers               Answer[]
   placementResources    PlacementResource[]
   broadcasts            Broadcast[]
-  clubApplications      ClubApplication[]
   createdClubs          Club[] @relation("ClubCreator")
-  reviewedClubApps      ClubApplication[] @relation("ClubApplicationReviewer")
+  heldClubPositions     ClubPosition[] @relation("ClubPositionHolder")
 
   @@index([role])
   @@map("users")
@@ -363,7 +362,6 @@ model Club {
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   positions     ClubPosition[]
-  applications  ClubApplication[]
 
   creator       User?     @relation("ClubCreator", fields: [createdBy], references: [id])
 
@@ -379,42 +377,18 @@ model ClubPosition {
   title        String   @db.VarChar(60) // President, Vice President, Secretary, ...
   eligibleYear Int?     @map("eligible_year") @db.SmallInt // null = any year
   description  String?  @db.Text
-  status       String   @default("open") @db.VarChar(12) // open|closed|filled
+  status       String   @default("open") @db.VarChar(12) // open|filled|closed
+  holderId     String?  @map("holder_id") @db.Uuid // student currently holding the position
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  applications ClubApplication[]
+  holder       User?    @relation("ClubPositionHolder", fields: [holderId], references: [id])
 
   @@index([clubId])
   @@index([status])
+  @@index([holderId])
   @@map("club_positions")
-}
-
-model ClubApplication {
-  id           String   @id @default(uuid()) @db.Uuid
-  clubId       String   @map("club_id") @db.Uuid
-  positionId   String   @map("position_id") @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  fullName     String   @map("full_name") @db.VarChar(100)
-  year         Int      @map("year") @db.SmallInt
-  branch       String   @map("branch") @db.VarChar(60)
-  statement    String?  @db.Text // why I want to join
-  resumeUrl    String?  @map("resume_url") @db.VarChar(500)
-  status       String   @default("submitted") @db.VarChar(20) // submitted|reviewed|interviewed|elected|rejected
-  reviewedAt   DateTime? @map("reviewed_at")
-  reviewedBy   String?  @map("reviewed_by") @db.Uuid
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  position ClubPosition @relation(fields: [positionId], references: [id])
-  club     Club        @relation(fields: [clubId], references: [id])
-  user     User        @relation(fields: [userId], references: [id])
-  reviewer   User?    @relation("ClubApplicationReviewer", fields: [reviewedBy], references: [id])
-
-  @@unique([positionId, userId]) // one application per position per student
-  @@index([userId])
-  @@index([status])
-  @@map("club_applications")
 }
 
 // ============ Feedback (anonymous) ============

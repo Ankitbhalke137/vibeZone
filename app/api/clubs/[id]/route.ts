@@ -42,8 +42,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         positions: {
           where: { status: "open" },
           orderBy: [{ title: "asc" }],
+          include: { holder: { select: { name: true, handle: true } } },
         },
-        _count: { select: { applications: true } },
         creator: { select: { name: true, handle: true } },
       },
     });
@@ -70,8 +70,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
           eligibleYear: p.eligibleYear,
           description: p.description,
           status: p.status,
+          holder: p.holder,
         })),
-        applicationCount: club._count.applications,
       },
     });
   } catch (e) {
@@ -110,7 +110,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     await audit({
       actorId: me.id,
-      action: "club_edit",
+      action: "event_edit",
       targetType: "club",
       targetId: id,
       metadata: { name: updated.name, slug: updated.slug },
@@ -126,7 +126,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     assertSameOrigin(req);
-    const me = await requireUser("moderator");
+    await requireUser("moderator");
     const { id } = await params;
     if (!isUuid(id)) {
       return NextResponse.json({ error: "Invalid club id." }, { status: 400 });
@@ -140,14 +140,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await db.club.update({
       where: { id },
       data: { status: "archived" },
-    });
-
-    await audit({
-      actorId: me.id,
-      action: "club_archive",
-      targetType: "club",
-      targetId: id,
-      metadata: { name: club.name, slug: club.slug },
     });
 
     return NextResponse.json({ ok: true });

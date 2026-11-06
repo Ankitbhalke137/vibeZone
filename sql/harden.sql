@@ -110,13 +110,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
   ALTER TABLE club_positions ADD CONSTRAINT club_positions_status_chk
-    CHECK (status IN ('open','closed','filled'));
+    CHECK (status IN ('open','filled','closed'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-DO $$ BEGIN
-  ALTER TABLE club_applications ADD CONSTRAINT club_applications_status_chk
-    CHECK (status IN ('submitted','reviewed','interviewed','elected','rejected'));
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-CREATE INDEX IF NOT EXISTS idx_club_app_user ON club_applications (user_id);
-CREATE INDEX IF NOT EXISTS idx_club_app_status ON club_applications (status);
+CREATE INDEX IF NOT EXISTS idx_club_pos_holder ON club_positions (holder_id);
