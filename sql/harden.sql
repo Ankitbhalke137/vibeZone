@@ -97,3 +97,26 @@ DO $$ BEGIN
   ALTER TABLE broadcasts ADD CONSTRAINT broadcasts_status_chk
     CHECK (status IN ('live','upcoming','ended'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE clubs ADD CONSTRAINT clubs_category_chk
+    CHECK (category IN ('tech','robotics','sports','business','cultural','content','social-welfare'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE clubs ADD CONSTRAINT clubs_status_chk
+    CHECK (status IN ('active','archived'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE club_positions ADD CONSTRAINT club_positions_status_chk
+    CHECK (status IN ('open','closed','filled'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE club_applications ADD CONSTRAINT club_applications_status_chk
+    CHECK (status IN ('submitted','reviewed','interviewed','elected','rejected'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+CREATE INDEX IF NOT EXISTS idx_club_app_user ON club_applications (user_id);
+CREATE INDEX IF NOT EXISTS idx_club_app_status ON club_applications (status);

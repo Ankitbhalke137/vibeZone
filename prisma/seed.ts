@@ -580,6 +580,126 @@ async function seedDemo(systemId: string) {
     }
   }
   console.log("✓ notifications");
+
+  // ── Club Elections ──────────────────────────────────────────
+  const clubs = [
+    {
+      name: "Tech Club",
+      slug: "tech-club",
+      description:
+        "Build, hack, and ship campus tech. Weekly coding sessions, hack nights, and open-source contributions.",
+      category: "tech",
+      icon: "Code2",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Lead the club, own the roadmap, represent tech on campus." },
+        { title: "Vice President", eligibleYear: 3, description: "Support the president and run day-to-day operations." },
+        { title: "Secretary", eligibleYear: null, description: "Handle documentation, meeting minutes, and member records." },
+      ],
+    },
+    {
+      name: "Robotics Club",
+      slug: "robotics-club",
+      description: "Build bots, automate everything, and compete in robotics events.",
+      category: "robotics",
+      icon: "Bot",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Lead builds, manage the workshop, lead competition teams." },
+        { title: "Vice President", eligibleYear: 3, description: "Coordinate builds and mentor junior members." },
+      ],
+    },
+    {
+      name: "Sports Club",
+      slug: "sports-club",
+      description: "Organise inter-branch tournaments, fitness sessions, and the annual sports fest.",
+      category: "sports",
+      icon: "Trophy",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Lead the sports calendar and inter-branch championships." },
+        { title: "Vice President", eligibleYear: 3, description: "Manage venues, equipment, and match scheduling." },
+      ],
+    },
+    {
+      name: "Business Club",
+      slug: "business-club",
+      description: "Case competitions, startup pitches, and finance & consulting prep.",
+      category: "business",
+      icon: "Briefcase",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Drive the entrepreneurship agenda and industry connect." },
+        { title: "Vice President", eligibleYear: 3, description: "Run case competitions and mentor student founders." },
+      ],
+    },
+    {
+      name: "Cultural Club",
+      slug: "cultural-club",
+      description: "Music, dance, drama, and the annual cultural showcase.",
+      category: "cultural",
+      icon: "Drama",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Lead cultural events and the annual fest programming." },
+        { title: "Vice President", eligibleYear: 3, description: "Manage auditions, rehearsals, and performer coordination." },
+      ],
+    },
+    {
+      name: "Content Club",
+      slug: "content-club",
+      description: "Photography, videography, design, and campus storytelling.",
+      category: "content",
+      icon: "Camera",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Own the content calendar and campus visual identity." },
+        { title: "Vice President", eligibleYear: 3, description: "Lead photo/video shoots and editing workflows." },
+      ],
+    },
+    {
+      name: "Social Welfare Club",
+      slug: "social-welfare-club",
+      description: "Community service, blood drives, donation camps, and social impact projects.",
+      category: "social-welfare",
+      icon: "HeartHandshake",
+      positions: [
+        { title: "President", eligibleYear: 4, description: "Lead outreach programmes and campus social initiatives." },
+        { title: "Vice President", eligibleYear: 3, description: "Coordinate drives and NGO partnerships." },
+      ],
+    },
+  ];
+
+  const clubYearLabel: Record<string, string> = {
+    "4": "2025 Batch",
+    "3": "2026 Batch",
+    "null": "All years",
+  };
+
+  for (const club of clubs) {
+    const row = await db.club.upsert({
+      where: { slug: club.slug },
+      update: {},
+      create: {
+        name: club.name,
+        slug: club.slug,
+        description: club.description,
+        category: club.category,
+        icon: club.icon,
+        createdBy: systemId,
+      },
+    });
+    for (const pos of club.positions) {
+      const exists = await db.clubPosition.findFirst({
+        where: { clubId: row.id, title: pos.title },
+      });
+      if (!exists) {
+        await db.clubPosition.create({
+          data: {
+            clubId: row.id,
+            title: pos.title,
+            eligibleYear: pos.eligibleYear,
+            description: pos.description,
+          },
+        });
+      }
+    }
+  }
+  console.log(`✓ ${clubs.length} clubs + positions (eligible years: ${Object.values(clubYearLabel).join(", ")})`);
 }
 
 async function seedQuiz() {

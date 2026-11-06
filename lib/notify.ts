@@ -9,6 +9,7 @@ export type NotificationType =
   | "poll_open"
   | "mentorship"
   | "moderation"
+  | "club_application"
   | "system";
 
 type NotifyInput = {

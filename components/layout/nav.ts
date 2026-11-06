@@ -6,6 +6,7 @@ import {
   Building2,
   CalendarDays,
   Compass,
+  Crown,
   Gamepad2,
   GraduationCap,
   Home,
@@ -64,6 +65,7 @@ export const MAIN_NAV: NavSection[] = [
   {
     label: "Campus life",
     items: [
+      { href: "/clubs", label: "Club Elections", icon: Crown },
       { href: "/lost-and-found", label: "Lost & Found", icon: PackageSearch },
       { href: "/mentorship", label: "Seniors Connect", icon: GraduationCap },
       { href: "/feedback", label: "Anonymous Feedback", icon: ShieldCheck },
