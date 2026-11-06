@@ -99,8 +99,7 @@ function LoginForm() {
       if (!res.ok) throw new Error(data.error ?? "Verification failed.");
       if (data.isNew) ga.signUp();
       else ga.login();
-      router.push(data.onboarded ? next : "/onboarding");
-      router.refresh();
+      void router.push(data.onboarded ? next : "/onboarding");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed.");
       setBusy(false);

@@ -46,8 +46,7 @@ export default function OnboardingPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Couldn't save.");
-      router.push("/home");
-      router.refresh();
+      void router.push("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't save.");
       setBusy(false);
