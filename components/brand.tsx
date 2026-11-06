@@ -1,3 +1,6 @@
+"use client";
+
+import { useId } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +15,11 @@ export function Brand({
   subtitle?: boolean;
   className?: string;
 }) {
+  // Brand renders more than once per page (header + footer) — keep SVG
+  // gradient ids unique so the references never collide.
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
+  const gradientId = `vz-gradient-${uid}`;
+  const ringId = `vz-ring-${uid}`;
   const mark = {
     sm: "size-8",
     md: "size-10",
@@ -39,19 +47,19 @@ export function Brand({
           aria-hidden="true"
         >
           <defs>
-            <linearGradient id="vz-gradient" x1="60" y1="140" x2="220" y2="320" gradientUnits="userSpaceOnUse">
+            <linearGradient id={gradientId} x1="60" y1="140" x2="220" y2="320" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#7c5cff" />
               <stop offset="50%" stopColor="#a855f7" />
               <stop offset="100%" stopColor="#d946ef" />
             </linearGradient>
-            <linearGradient id="vz-ring" x1="80" y1="200" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+            <linearGradient id={ringId} x1="80" y1="200" x2="320" y2="320" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#7c5cff" stopOpacity="0.85" />
               <stop offset="100%" stopColor="#d946ef" stopOpacity="0.25" />
             </linearGradient>
           </defs>
           <path
             d="M60 320L140 140L220 320"
-            stroke="url(#vz-gradient)"
+            stroke={`url(#${gradientId})`}
             strokeWidth="48"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -59,7 +67,7 @@ export function Brand({
           <path
             d="M80 320C100 200 300 200 320 320"
             fill="none"
-            stroke="url(#vz-ring)"
+            stroke={`url(#${ringId})`}
             strokeWidth="10"
           />
           <path d="M320 130L310 140L300 130L310 120ZM320 160L310 150L300 160L310 170ZM300 140L310 140L320 140L310 130ZM310 160L320 160L330 160L320 170Z" fill="#ffffff" />

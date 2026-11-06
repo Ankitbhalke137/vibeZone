@@ -14,9 +14,6 @@
     "test": "vitest run",
     "db:reset-demo": "node scripts/with-env.mjs tsx prisma/seed.ts"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@neon/config": "^1.9.4",
     "@neon/env": "^1.6.5",

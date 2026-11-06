@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { env } from "@/lib/env";
+import { isUuid } from "@/lib/uuid";
 
 export const SESSION_COOKIE = "vz_session";
 export const SESSION_DAYS = 7; // FR-AUTH-004
@@ -23,11 +24,13 @@ export async function verifySessionToken(token?: string | null): Promise<Session
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, key());
-    if (!payload.sub) return null;
+    if (!payload.sub || !isUuid(payload.sub)) return null;
+    const sv = Number(payload.sv ?? 0);
+    if (!Number.isInteger(sv) || sv < 0) return null;
     return {
       sub: payload.sub,
       role: String(payload.role ?? "student"),
-      sv: Number(payload.sv ?? 0),
+      sv,
     };
   } catch {
     return null;
