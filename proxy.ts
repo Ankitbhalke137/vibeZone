@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { isUuid } from "@/lib/uuid";
 
 const COOKIE = "vz_session";
 
@@ -15,8 +16,12 @@ export async function proxy(req: NextRequest) {
 
   if (token) {
     try {
-      await jwtVerify(token, new TextEncoder().encode(process.env.SESSION_SECRET ?? ""));
-      ok = true;
+      const { payload } = await jwtVerify(
+        token,
+        new TextEncoder().encode(process.env.SESSION_SECRET ?? ""),
+      );
+      // Reject forged/legacy tokens whose subject is not a real user id.
+      ok = isUuid(payload.sub);
     } catch {
       ok = false;
     }

@@ -14,10 +14,17 @@ import {
   uuidFromString,
 } from "@/lib/time";
 
+// `fc.date()` can generate Invalid Date; clamp the range and reject those.
+const VALID_DATE = fc.date({
+  min: new Date(2020, 0, 1),
+  max: new Date(2030, 0, 1),
+  noInvalidDate: true,
+});
+
 describe("istDayKey", () => {
   it("should always return YYYY-MM-DD format", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const key = istDayKey(date);
         expect(/^\d{4}-\d{2}-\d{2}$/.test(key)).toBe(true);
       }),
@@ -26,7 +33,7 @@ describe("istDayKey", () => {
 
   it("should return the same key for any time within the same IST day", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const key1 = istDayKey(date);
         // Same day, different time: add up to 23 hours 59 minutes
         const later = new Date(date.getTime() + 23 * 60 * 60_000 + 59 * 60_000);
@@ -42,7 +49,7 @@ describe("istDayKey", () => {
 describe("startOfDayIST", () => {
   it("should always return midnight (00:00:00.000) of the IST day", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const start = startOfDayIST(date);
         // Midnight IST = 18:30 UTC (previous day) or 18:30 UTC same day
         // So in UTC: hours=18, minutes=30, seconds=0, ms=0
@@ -56,7 +63,7 @@ describe("startOfDayIST", () => {
 
   it("should be idempotent: startOfDayIST(startOfDayIST(d)) === startOfDayIST(d)", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const once = startOfDayIST(date);
         const twice = startOfDayIST(once);
         expect(twice.getTime()).toBe(once.getTime());
@@ -68,7 +75,7 @@ describe("startOfDayIST", () => {
 describe("endOfDayIST", () => {
   it("should be exactly 24 hours after startOfDayIST", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const start = startOfDayIST(date);
         const end = endOfDayIST(date);
         expect(end.getTime() - start.getTime()).toBe(24 * 60 * 60_000);
@@ -80,7 +87,7 @@ describe("endOfDayIST", () => {
 describe("startOfWeekIST", () => {
   it("should always return a Monday (weekday 1 in IST)", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const weekStart = startOfWeekIST(date);
         const istPartsResult = istParts(weekStart);
         // weekday: 0 = Sunday, 1 = Monday
@@ -91,7 +98,7 @@ describe("startOfWeekIST", () => {
 
   it("should be idempotent: startOfWeekIST(startOfWeekIST(d)) === startOfWeekIST(d)", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const once = startOfWeekIST(date);
         const twice = startOfWeekIST(once);
         expect(twice.getTime()).toBe(once.getTime());
@@ -101,7 +108,7 @@ describe("startOfWeekIST", () => {
 
   it("should return a date on or before the input date", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const weekStart = startOfWeekIST(date);
         expect(weekStart.getTime()).toBeLessThanOrEqual(date.getTime());
       }),
@@ -112,7 +119,7 @@ describe("startOfWeekIST", () => {
 describe("nextMondayIST", () => {
   it("should be exactly 7 days after startOfWeekIST", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const weekStart = startOfWeekIST(date);
         const nextMon = nextMondayIST(date);
         expect(nextMon.getTime() - weekStart.getTime()).toBe(7 * 24 * 60 * 60_000);
@@ -124,7 +131,7 @@ describe("nextMondayIST", () => {
 describe("todayPollWindow", () => {
   it("should have opensAt before closesAt on the same IST day", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const window = todayPollWindow(date);
         expect(window.opensAt.getTime()).toBeLessThan(window.closesAt.getTime());
         // Both should be on the same IST day
@@ -135,7 +142,7 @@ describe("todayPollWindow", () => {
 
   it("should have opensAt at 07:00 IST and closesAt at 23:00 IST", () => {
     fc.assert(
-      fc.property(fc.date({ min: new Date(2020, 0, 1), max: new Date(2030, 0, 1) }).filter((d) => !isNaN(d.getTime())), (date) => {
+      fc.property(VALID_DATE, (date) => {
         const window = todayPollWindow(date);
         const openIST = window.opensAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "numeric", hour12: false });
         const closeIST = window.closesAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "numeric", hour12: false });
