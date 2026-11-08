@@ -13,17 +13,32 @@ vm/**/package-lock.json
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# env files — NEVER commit real values (Q2: secrets live only here + Vercel)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-vm/.env
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# coverage
+coverage/
+.nyc_output/
+
+# package manager locks (other than npm)
+yarn.lock
+pnpm-lock.yaml
+
+# local env (never commit real values)
+.env*
+!.env.example
 
 # vercel
 .vercel
@@ -36,12 +51,8 @@ next-env.d.ts
 /prisma/generated
 .neon
 
-# vercel
-.vercel
-
 # local scratch scripts — may contain dev credentials, never commit
 /test-clubs.mjs
-.env*
 
 # playwright
 /playwright-report/
