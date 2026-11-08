@@ -2,7 +2,7 @@
  * Unit tests for notify.ts with a mocked Prisma client — no real DB or VAPID keys required.
  * Runs with: npx vitest run --no-file-parallelism lib/__tests__/notify.test.ts
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { db } from "@/lib/db";
 import { notifyUser, notifyUsers, notifyEveryone } from "@/lib/notify";
 
