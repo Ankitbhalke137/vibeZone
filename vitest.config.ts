@@ -9,7 +9,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["lib/__tests__/**/*.test.ts"],
+    include: ["lib/__tests__/**/*.test.ts", "app/api/__tests__/**/*.test.ts"],
     globals: true,
     env: {
       SESSION_SECRET: "test-secret-key-for-testing-only",
