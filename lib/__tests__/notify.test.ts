@@ -62,7 +62,7 @@ describe("notifyUsers", () => {
     expect(createdUserIds()).toEqual(["a", "c"]);
     expect(findManyMock).toHaveBeenCalledWith({
       where: { userId: { in: ["a", "c"] }, category: "dm" },
-      expect.anything(),
+      select: expect.anything(),
     });
   });
 
@@ -101,7 +101,7 @@ describe("notifyUser", () => {
     await notifyUser("a", INPUT);
     expect(findManyMock).toHaveBeenCalledWith({
       where: { userId: { in: ["a"] }, category: "dm" },
-      expect.anything(),
+      select: expect.anything(),
     });
     expect(createdUserIds()).toEqual(["a"]);
   });
@@ -117,7 +117,7 @@ describe("notifyEveryone", () => {
     });
     expect(findManyMock).toHaveBeenCalledWith({
       where: { userId: { in: ["u1", "u2"] }, category: "dm" },
-      expect.anything(),
+      select: expect.anything(),
     });
     expect(n).toBe(2);
   });
