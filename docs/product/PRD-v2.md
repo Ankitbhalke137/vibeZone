@@ -2,14 +2,14 @@
 
 **Version:** 2.1  ·  **Date:** 24 Oct 2026  ·  **Status:** Ready for build — revised for **solo build + hard-$0 stack** (decisions D5–D10)
 **Supersedes:** `VibeZone - Finalized Product Requirements Document (PRD) & Database Schema.md` (v1 draft)
-**Companion document:** `VibeZone - 8-Week Delivery Plan.md`
+**Companion document:** `docs/product/delivery-plan.md`
 
 > **Plan update (25 Oct 2026) — D12: Database = Neon Postgres (free tier).**
 > The database is no longer the VM's Postgres container. The app uses Neon's
 > **pooled** URL (`DATABASE_URL`) and **direct** URL (`DIRECT_URL`, for Prisma
 > schema operations). The OCI VM now runs only the mailer, Socket.IO realtime
 > gateway and scheduler. Wherever D1/D7/§9/§10 below mention "Postgres on the
-> OCI VM", read **Neon Postgres**. Setup: `docs/NEON.md`. Everything else in
+> OCI VM", read **Neon Postgres**. Setup: `docs/operations/NEON.md`. Everything else in
 > this PRD is unchanged.
 
 
@@ -965,7 +965,7 @@ Auth: handshake carries the session token; unauthenticated sockets receive only 
 | **M2 — Social & Engagement** | Weeks 4–6 | Chat/DM/aliases, events + reminders, notes, polls, points, moderation console | All P0 modules feature-complete end-to-end in staging, demoed on a phone |
 | **M3 — Launch** | Weeks 7–8 | Feedback portal, notifications, polish, security/perf pass, UAT (+ Lost & Found / Seniors Connect **only if ahead** — D6) | All §17 criteria green → production go-live |
 
-Detailed week-by-week execution (solo pace table, workstreams, cut lines, launch checklist) live in **`VibeZone - 8-Week Delivery Plan.md`**.
+Detailed week-by-week execution (solo pace table, workstreams, cut lines, launch checklist) live in **`docs/product/delivery-plan.md`**.
 
 ---
 

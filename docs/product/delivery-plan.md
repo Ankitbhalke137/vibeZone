@@ -1,10 +1,10 @@
 # VibeZone — 8-Week Solo Delivery Plan
 
-**Version:** 2.0 (Solo edition) · **Date:** 24 Oct 2026 · **Companion to:** `VibeZone - PRD v2.md` (v2.1)
+**Version:** 2.0 (Solo edition) · **Date:** 24 Oct 2026 · **Companion to:** `docs/product/PRD-v2.md` (v2.1)
 **Builder:** Solo · **Stack:** hard $0 — Vercel Hobby (app, `bom1` Mumbai) + OCI Always Free VM (`ap-mumbai-1`: Postgres, realtime, schedulers, mail) + Gmail SMTP · **Milestones:** M1 W1–3 · M2 W4–6 · M3 W7–8
 **Scope baseline:** All **P0** requirements of the PRD. Lost & Found + Seniors Connect + trivia = **conditional** (D6): only if ahead of schedule in Week 7.
 
-> **Update 25 Oct 2026 — D12:** the database is **Neon Postgres** (free tier), not the VM's Postgres container. The app uses a pooled `DATABASE_URL` + direct `DIRECT_URL`; the VM now runs only mailer, realtime gateway and scheduler. Neon setup: `docs/NEON.md`. Replace "VM Postgres" with "Neon" wherever it appears below.
+> **Update 25 Oct 2026 — D12:** the database is **Neon Postgres** (free tier), not the VM's Postgres container. The app uses a pooled `DATABASE_URL` + direct `DIRECT_URL`; the VM now runs only mailer, realtime gateway and scheduler. Neon setup: `docs/operations/NEON.md`. Replace "VM Postgres" with "Neon" wherever it appears below.
 
 ---
 
