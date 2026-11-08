@@ -29,7 +29,7 @@ afterEach(() => {
   delete process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
   delete process.env.NEXT_PUBLIC_REALTIME_URL;
   delete process.env.NEXT_PUBLIC_APP_URL;
-  delete process.env.NODE_ENV;
+  delete (process.env as Record<string, string | undefined>).NODE_ENV;
   delete process.env.MAILER_URL;
   delete process.env.CHAT_FILTER_WORDS;
 });
