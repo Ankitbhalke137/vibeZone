@@ -8,9 +8,9 @@
 [![Socket.IO](https://img.shields.io/badge/Realtime-Socket.IO-red?style=flat-square&logo=socket.io)](https://socket.io/)
 [![PWA](https://img.shields.io/badge/PWA-Yes-blue?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](docs/development/CONTRIBUTING.md)
 
-**Docs:** [`VibeZone - PRD v2.md`](./VibeZone%20-%20PRD%20v2.md) (requirements + schema) · [`VibeZone - 8-Week Delivery Plan.md`](./VibeZone%20-%208-Week%20Delivery%20Plan.md) (execution) · [`docs/NEON.md`](./docs/NEON.md) (Neon setup) · [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) (ops)
+**Docs:** [`docs/product/PRD-v2.md`](./docs/product/PRD-v2.md) (requirements + schema) · [`docs/product/delivery-plan.md`](./docs/product/delivery-plan.md) (execution) · [`docs/operations/NEON.md`](./docs/operations/NEON.md) (Neon setup) · [`docs/operations/RUNBOOK.md`](./docs/operations/RUNBOOK.md) (ops) · [`docs/README.md`](./docs/README.md) (full docs index)
 
 ## Table of contents
 
@@ -66,7 +66,7 @@ All stack decisions are locked in the PRD decision log (D1–D12). The database 
 | CI/CD | Vercel Git integration (app) + GitHub Actions → SSH `docker compose up -d` (VM) | Both free quotas |
 | Monitoring | Uptime Kuma on VM + Sentry + logrotate | Free |
 
-> **D12 (25 Oct 2026):** database moved from the VM's Postgres container to **Neon**. The VM now runs only mailer, realtime gateway and scheduler. See [`docs/NEON.md`](./docs/NEON.md).
+> **D12 (25 Oct 2026):** database moved from the VM's Postgres container to **Neon**. The VM now runs only mailer, realtime gateway and scheduler. See [`docs/operations/NEON.md`](./docs/operations/NEON.md).
 
 ## Status legend
 
@@ -297,7 +297,7 @@ Lost & Found, Seniors Connect, and weekly trivia default to **v1.5** unless Week
 ## Known issues & risks
 
 - ⚠️ **Restore drill pending** — NFR-010 requires a backup restore drill before launch (RUNBOOK has a placeholder drill row; not yet executed).
-- ⚠️ **Secrets unset** — several env vars still unset in Vercel/`vm/.env` (see secrets inventory in `docs/RUNBOOK.md` §6).
+- ⚠️ **Secrets unset** — several env vars still unset in Vercel/`vm/.env` (see secrets inventory in `docs/operations/RUNBOOK.md` §6).
 - ⚠️ **Gmail App Password rotation** — the App Password was shared in chat and must be rotated before launch (plan §3 Week 1; RUNBOOK §5).
 - ⚠️ **No UAT yet** — 5–10 student UAT over 3 days on preview deployments is part of M3; not yet completed.
 - ⚠️ **No `v1.0.0` tag** — launch tag not yet created.
@@ -362,7 +362,7 @@ Available npm scripts:
 
 Push to `main` → Vercel auto-deploys; per-branch previews serve as your UAT test bed.
 
-**VM (mail + realtime + scheduler):** see [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) — copy `vm/.env.example` → `vm/.env`, fill secrets, open OCI security list (22 key-only, 80/443 for Caddy; no database port exposed), then `docker compose up -d --build`.
+**VM (mail + realtime + scheduler):** see [`docs/operations/RUNBOOK.md`](./docs/operations/RUNBOOK.md) — copy `vm/.env.example` → `vm/.env`, fill secrets, open OCI security list (22 key-only, 80/443 for Caddy; no database port exposed), then `docker compose up -d --build`.
 
 VM env needs the **pooled** Neon `DATABASE_URL` (gateway and scheduler are long-running Node processes that work through PgBouncer).
 
@@ -420,7 +420,7 @@ Bus-factor protection: push daily; keep `LOG.md` with decisions; README architec
 
 ---
 
-*Maintained on branch `feat/professionalization`. Source of truth for requirements: [`VibeZone - PRD v2.md`](./VibeZone%20-%20PRD%20v2.md); execution: [`VibeZone - 8-Week Delivery Plan.md`](./VibeZone%20-%208-Week%20Delivery%20Plan.md).*
+*Maintained on branch `feat/professionalization`. Source of truth for requirements: [`docs/product/PRD-v2.md`](./docs/product/PRD-v2.md); execution: [`docs/product/delivery-plan.md`](./docs/product/delivery-plan.md).*
 
 
 

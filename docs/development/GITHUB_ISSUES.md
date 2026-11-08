@@ -81,13 +81,13 @@ This secret is now exposed in the git repository and possibly in shared chat log
 ### Body
 
 ## Description
-Before go-live we must prove we can recover from database loss or VM failure. Neon Postgres (free tier) provides automatic backups; the VM runs mailer, realtime gateway, and scheduler as Docker containers. A restore drill verifies backups actually work and produces documented recovery steps (RTO/RPO) in `docs/RUNBOOK.md`.
+Before go-live we must prove we can recover from database loss or VM failure. Neon Postgres (free tier) provides automatic backups; the VM runs mailer, realtime gateway, and scheduler as Docker containers. A restore drill verifies backups actually work and produces documented recovery steps (RTO/RPO) in `docs/operations/RUNBOOK.md`.
 
 ### Acceptance criteria
 - [ ] Neon backup/restore tested: restore to a scratch Neon project, run Prisma schema push, verify schema + seed data are intact.
 - [ ] VM backup procedure documented: which Docker volumes/configs to back up (Caddy certs, mailer state, scheduler logs), frequency, and retention.
 - [ ] Full restore drill executed end-to-end in a scratch environment (app + VM stack).
-- [ ] `docs/RUNBOOK.md` contains a "Disaster recovery / restore drill" section with: step-by-step restore instructions, RTO, RPO, last-tested date, and owner.
+- [ ] `docs/operations/RUNBOOK.md` contains a "Disaster recovery / restore drill" section with: step-by-step restore instructions, RTO, RPO, last-tested date, and owner.
 - [ ] Drill signed off before the v1.0.0 tag (issue 5).
 
 ### Labels
@@ -211,7 +211,7 @@ Cut the v1 release: create the `v1.0.0` git tag on `main`, publish a GitHub Rele
 - [ ] `npm test` passes locally 3 consecutive runs without any worker-pool crash.
 - [ ] `vitest.config.ts` updated with stable pool settings (pool type, `maxWorkers`, environment per file as needed).
 - [ ] All existing tests in `lib/__tests__/` are green.
-- [ ] Test run is part of the definition of done for every PR (see CONTRIBUTING.md).
+- [ ] Test run is part of the definition of done for every PR (see `docs/development/CONTRIBUTING.md`).
 
 ### Labels
 `bug`, `testing`, `priority: P1`
@@ -281,10 +281,10 @@ Rewrite `README.md` into a professional project front door: badges, stack table,
 ### Body
 
 ## Description
-Configure GitHub branch protection on `main` so no code can land without review and passing status checks. Rules are specified exactly in `BRANCH_PROTECTION.md`, including the GitHub UI navigation path and every toggle to flip.
+Configure GitHub branch protection on `main` so no code can land without review and passing status checks. Rules are specified exactly in `docs/development/BRANCH_PROTECTION.md`, including the GitHub UI navigation path and every toggle to flip.
 
 ### Acceptance criteria
-- [ ] Branch protection rule created for `main` per `BRANCH_PROTECTION.md`.
+- [ ] Branch protection rule created for `main` per `docs/development/BRANCH_PROTECTION.md`.
 - [ ] Verified: direct push to `main` is blocked; PR requires 1 approving review + status checks.
 - [ ] "Include administrators" enabled so rules apply to repo admins too.
 - [ ] Force pushes and deletions of `main` disallowed.
@@ -306,7 +306,7 @@ Configure GitHub branch protection on `main` so no code can land without review 
 ### Body
 
 ## Description
-Review `VibeZone - PRD v2.md`, the P1 feature list, and the 8-week delivery plan. Decide, feature by feature, what to **keep**, **cut**, or **defer** for v1.0.0. Record the decision log and re-scope cut items into v1.1/v2 milestones so the v1 scope is frozen before go-live (issue 5).
+Review `docs/product/PRD-v2.md`, the P1 feature list, and the 8-week delivery plan. Decide, feature by feature, what to **keep**, **cut**, or **defer** for v1.0.0. Record the decision log and re-scope cut items into v1.1/v2 milestones so the v1 scope is frozen before go-live (issue 5).
 
 ### Acceptance criteria
 - [ ] Decision log document (or GitHub project notes) with keep/cut/defer per feature and rationale.

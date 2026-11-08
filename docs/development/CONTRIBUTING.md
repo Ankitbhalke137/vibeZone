@@ -1,7 +1,7 @@
 # Contributing to VibeZone
 
 **Repo:** https://github.com/Ankitbhalke137/vibeZone.git  
-**Default branch:** `main` (protected — see `BRANCH_PROTECTION.md`)
+**Default branch:** `main` (protected — see `docs/development/BRANCH_PROTECTION.md`)
 
 Thanks for contributing! VibeZone is a campus app (Next.js 16 App Router, Neon Postgres, Vercel + OCI VM stack). These rules keep the v1.0.0 release stable and reviewable.
 
