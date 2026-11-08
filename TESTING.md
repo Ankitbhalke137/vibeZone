@@ -86,9 +86,54 @@ These lib modules still lack tests (mostly DB- or network-bound; mock the client
 - `lib/points.ts`, `lib/notify.ts`, `lib/audit.ts` are tested with a mocked `db`; integration against a real Postgres is still missing.
 - `lib/dashboard-data.ts`, `lib/daily-drop.ts` network path (covered with mocked fetch), `lib/mailer.ts`, `lib/realtime.ts`, `lib/ga.ts`, `lib/env.ts` getters under production values, `lib/feed-types.ts` (types only — no runtime).
 - `app/api/v1/*` routes: every route needs a test DB or mocked Prisma + session; see `app/api/__tests__/api-routes.test.ts` for the checklist.
-- End-to-end / Playwright (e2e folder excluded from tsconfig).
+- End-to-end / Playwright (e2e folder, playwright.config.ts).
+
+## Playwright E2E Tests
+
+End-to-end tests live in `e2e/` and run against a local dev server.
+
+### Commands
+
+```bash
+# Run all E2E tests (headless Chromium, mobile Chrome, mobile Safari)
+npm run test:e2e
+
+# Run in headed mode (watch the browser)
+npm run test:e2e:headed
+
+# Run with Playwright UI
+npm run test:e2e:ui
+
+# Run a single test file
+npx playwright test e2e/auth.test.ts
+
+# Debug a failing test
+npx playwright test --debug
+```
+
+### Test files
+
+| File | Covered flow |
+|------|-------------|
+| `e2e/auth.test.ts` | Signup/login with OTP, non-campus email rejection |
+| `e2e/chat.test.ts` | Send messages, toggle alias mode |
+| `e2e/events.test.ts` | View events, RSVP |
+| `e2e/notes.test.ts` | View notes, search/filter |
+| `e2e/polls.test.ts` | View poll, vote, leaderboard |
+| `e2e/feedback.test.ts` | Anonymous feedback submission |
+| `e2e/auth.test.ts` (profile/settings) | View profile, toggle dark/light theme |
+
+### Configuration
+
+`playwright.config.ts` runs tests against `npm run dev` (localhost:3000) across:
+- Desktop Chrome
+- Mobile Chrome (Pixel 5)
+- Mobile Safari (iPhone 12)
+
+Tests use dev-mode OTP flow (login with `isha@pwioi.com`, OTP `000000`).
 
 ## Known workarounds & gotchas
+
 
 1. **Worker pool:** use `--no-file-parallelism` (see above).
 2. **`__dirname` warning:** `vitest.config.ts` uses `__dirname`; harmless Vite config-loader warning, suppress with `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` if desired.
