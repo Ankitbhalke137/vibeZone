@@ -4,7 +4,7 @@
  * Runs with: npx vitest run --no-file-parallelism lib/__tests__/env.test.ts
  */
 import fc from "fast-check";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, vi } from "vitest";
 import { env, isCampusEmail } from "@/lib/env";
 
 function envVar(name: string, value: string | undefined) {
