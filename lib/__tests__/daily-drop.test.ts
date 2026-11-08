@@ -5,7 +5,7 @@
  * Runs with: npx vitest run --no-file-parallelism lib/__tests__/daily-drop.test.ts
  */
 import fc from "fast-check";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, vi } from "vitest";
 import { getDailyDrop } from "@/lib/daily-drop";
 
 const originalFetch = globalThis.fetch;
