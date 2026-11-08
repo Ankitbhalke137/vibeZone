@@ -4,7 +4,7 @@
  * Runs with: npx vitest run --no-file-parallelism lib/__tests__/audit.test.ts
  */
 import { Prisma } from "@prisma/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { db } from "@/lib/db";
 import { audit, type AuditAction } from "@/lib/audit";
 

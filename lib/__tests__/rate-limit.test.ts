@@ -3,7 +3,7 @@
  * Pure function of `Date.now()` — driven with fake timers, no DB needed.
  * Runs with: npx vitest run --no-file-parallelism lib/__tests__/rate-limit.test.ts
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { hit } from "@/lib/rate-limit";
 
 describe("hit", () => {

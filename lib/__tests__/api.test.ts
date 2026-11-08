@@ -4,7 +4,6 @@
  * Runs with: npx vitest run --no-file-parallelism lib/__tests__/api.test.ts
  */
 import fc from "fast-check";
-import { describe, expect, it } from "vitest";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, assertSameOrigin, excerpt, parseJson } from "@/lib/api";
