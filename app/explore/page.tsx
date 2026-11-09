@@ -5,6 +5,7 @@ import {
   BookOpen,
   CalendarDays,
   Compass,
+  Clock,
   Hash,
   Search,
   Sparkles,
@@ -18,6 +19,7 @@ import { PageHeader, SectionHeader } from "@/components/ui/page-header";
 import { Feed } from "@/components/feed/feed";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 
 const BRANCHES = ["CSE", "IT", "ECE", "EEE", "ME", "CE", "Other"];
 const YEARS = [1, 2, 3, 4];
@@ -67,6 +69,7 @@ export default async function ExplorePage({
           branch: true,
           year: true,
           role: true,
+          lastSeenAt: true,
         },
       }),
       query
@@ -139,6 +142,25 @@ export default async function ExplorePage({
         .filter((y): y is number => y !== null),
     ),
   ].sort((a, b) => a - b);
+
+  /** Human-friendly "last active" label from a timestamp. */
+  function lastActiveLabel(lastSeenAt: Date | null): string {
+    if (!lastSeenAt) return "Not active yet";
+    const now = Date.now();
+    const diff = now - lastSeenAt.getTime();
+    const min = Math.floor(diff / 60_000);
+    if (min < 1) return "Active now";
+    if (min < 60) return `Active ${min}m ago`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `Active ${hr}h ago`;
+    const day = Math.floor(hr / 24);
+    if (day === 1) return "Active yesterday";
+    if (day < 7) return `Active ${day}d ago`;
+    return lastSeenAt.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -284,31 +306,54 @@ export default async function ExplorePage({
                 No people match that search.
               </p>
             ) : (
-              <ul className="mt-3 flex flex-col gap-2.5">
+              <div className="mt-3 grid gap-2.5">
                 {people.map((person) => (
-                  <li key={person.id}>
-                    <Link href={`/u/${person.handle}`} className="group flex items-center gap-2.5">
-                      <Avatar
-                        name={person.name}
-                        handle={person.handle}
-                        avatarUrl={person.avatarUrl}
-                        size="sm"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[11px] font-semibold group-hover:text-primary">
-                          {person.name}
+                  <Link
+                    key={person.id}
+                    href={`/u/${person.handle}`}
+                    className="vz-panel vz-card-hover group flex flex-col p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar
+                          name={person.name}
+                          handle={person.handle}
+                          avatarUrl={person.avatarUrl}
+                          size="sm"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[11px] font-semibold group-hover:text-primary">
+                            {person.name}
+                          </span>
+                          <span className="block truncate text-[10px] text-muted">
+                            @{person.handle}
+                            {person.branch ? ` · ${person.branch}` : ""}
+                            {person.year ? ` · Y${person.year}` : ""}
+                          </span>
                         </span>
-                        <span className="block truncate text-[10px] text-muted">
-                          @{person.handle}
-                          {person.branch ? ` · ${person.branch}` : ""}
-                          {person.year ? ` · Y${person.year}` : ""}
-                        </span>
+                      </div>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold",
+                          person.lastSeenAt &&
+                            Date.now() - person.lastSeenAt.getTime() < 5 * 60_000
+                            ? "bg-success/10 text-success"
+                            : "bg-accent text-muted",
+                        )}
+                      >
+                        <Clock size={9} className="shrink-0" />
+                        {lastActiveLabel(person.lastSeenAt)}
                       </span>
-                      <ArrowRight size={12} className="shrink-0 text-muted-2 group-hover:text-primary" />
-                    </Link>
-                  </li>
+                    </div>
+                    <div className="w-full flex items-center justify-between pt-1.5 border-t border-[var(--vz-border-soft)]">
+                      <span className="text-[9px] text-muted-2 uppercase tracking-wide">
+                        {person.role.charAt(0).toUpperCase() + person.role.slice(1)}
+                      </span>
+                      <ArrowRight size={11} className="text-muted-2 group-hover:text-primary" />
+                    </div>
+                  </Link>
                 ))}
-              </ul>
+              </div>
             )}
           </section>
 
