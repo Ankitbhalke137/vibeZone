@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +23,11 @@ const CLUB_META: Record<string, { color: string; Icon: React.ElementType }> = {
   "social-welfare": { color: "fuchsia", Icon: HeartHandshake },
 };
 
-export default async function ClubsPage({ searchParams }: { searchParams: { category?: string } }) {
-  const category = searchParams.category;
+export default async function ClubsPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const me = await getCurrentUser();
+  if (!me) redirect("/login?next=/clubs");
+
+  const { category } = await searchParams;
 
   let clubs = await db.club.findMany({
     where: {

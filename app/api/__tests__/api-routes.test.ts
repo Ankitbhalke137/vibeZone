@@ -66,36 +66,12 @@ describe("GET /api/v1/mentorship/requests and POST /[id]/respond", () => {
   it.skip("senior can accept/reject; creates notification + audit log", () => {});
 });
 
-describe("GET /api/v1/study-groups", () => {
-  it.skip("lists active study groups", () => {});
-});
-
 describe("GET /api/v1/bookmarks", () => {
   it.skip("user-scoped bookmarks list", () => {});
 });
 
-describe("GET /api/v1/calendar", () => {
-  it.skip("merged events + polls within range", () => {});
-});
-
-describe("GET /api/v1/placements", () => {
-  it.skip("public placement listings", () => {});
-});
-
-describe("GET /api/v1/questions and answers", () => {
-  it.skip("Q&A create/vote/accept flow", () => {});
-});
-
 describe("GET /api/v1/search", () => {
   it.skip("full-text search across posts/notes/events", () => {});
-});
-
-describe("GET /api/v1/games/quiz", () => {
-  it.skip("quiz question payload", () => {});
-});
-
-describe("GET /api/v1/live", () => {
-  it.skip("realtime token/gateway health", () => {});
 });
 
 describe("Admin routes (announcements, feedback, moderation, users)", () => {

@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/avatar";
-import { TiltAvatar } from "@/components/3d/tilt-avatar";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ga } from "@/lib/ga";
@@ -440,7 +439,7 @@ export function ChatRoom({
 
                         <div className={cn("flex gap-2", mine && "flex-row-reverse")}>
                           {!mine ? (
-                            <TiltAvatar
+                            <Avatar
                               name={message.displayName}
                               handle={message.handle ?? undefined}
                               avatarUrl={message.avatarUrl}

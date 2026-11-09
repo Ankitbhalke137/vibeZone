@@ -8,7 +8,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Avatar } from "@/components/avatar";
-import { TiltAvatar } from "@/components/3d/tilt-avatar";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -78,7 +77,7 @@ export function ProfileHero({
       <div className="px-4 pb-4 sm:px-5 sm:pb-5">
         <div className="-mt-10 flex items-end justify-between gap-3 sm:-mt-12">
           <div className="relative z-10">
-            <TiltAvatar name={name} handle={handle} avatarUrl={avatarUrl} size="xl" />
+            <Avatar name={name} handle={handle} avatarUrl={avatarUrl} size="xl" className="ring-4 ring-[var(--vz-card)] transition-transform duration-300 hover:scale-105" />
           </div>
           {action ? <div className="mb-1 shrink-0">{action}</div> : null}
         </div>

@@ -70,7 +70,14 @@ export const env = {
     return process.env.FEEDBACK_SALT?.trim() || this.sessionSecret;
   },
   get appUrl() {
-    return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const value = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (!value) {
+      if (process.env.NODE_ENV === "production") {
+        console.warn("[env] NEXT_PUBLIC_APP_URL is unset — falling back to localhost in production.");
+      }
+      return "http://localhost:3000";
+    }
+    return value.replace(/\/$/, "");
   },
   get isProd() {
     return process.env.NODE_ENV === "production";

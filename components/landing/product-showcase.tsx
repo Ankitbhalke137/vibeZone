@@ -13,7 +13,6 @@ import {
   GraduationCap,
   CheckCircle2,
 } from "lucide-react";
-import { HeroCanvas } from "@/components/3d/hero-canvas";
 import { cn } from "@/lib/utils";
 
 export function ProductShowcase() {
@@ -89,9 +88,6 @@ export function ProductShowcase() {
         perspective: "1200px",
       }}
     >
-      {/* Ambient 3D particle canvas (Three.js integration where appropriate) */}
-      <HeroCanvas />
-
       {/* Ambient background glow */}
       <div
         className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-tr from-primary/25 via-fuchsia-500/15 to-violet-500/20 blur-3xl transition-opacity duration-300"

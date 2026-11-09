@@ -34,8 +34,15 @@ export function SettingsPanel({ user }: { user: User }) {
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(true);
+  const [sessions, setSessions] = useState<Array<{ id: string; createdAt: string; lastSeenAt: string; isCurrent: boolean }> | null>(null);
 
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    fetch("/api/v1/auth/sessions", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setSessions(Array.isArray(d?.sessions) ? d.sessions : []))
+      .catch(() => setSessions([]));
+  }, []);
 
   async function signOut() {
     setBusy(true);
@@ -127,6 +134,35 @@ export function SettingsPanel({ user }: { user: User }) {
               <LogOut size={14} /> {busy ? "Signing out…" : "Sign out"}
             </Button>
           </div>
+        </section>
+
+        <section className="vz-panel p-5">
+          <h2 className="text-sm font-bold">Active sessions</h2>
+          <p className="mt-0.5 text-[11px] text-muted">
+            Devices signed in to your account. Signing out elsewhere is not available yet.
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {sessions === null ? (
+              <li className="text-[11px] text-muted">Loading sessions…</li>
+            ) : sessions.length === 0 ? (
+              <li className="text-[11px] text-muted">No active sessions found.</li>
+            ) : (
+              sessions.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between rounded-xl border border-border bg-[var(--vz-card-2)] px-3 py-2 text-[11px]"
+                >
+                  <span className="flex items-center gap-2">
+                    <Monitor size={13} className="text-primary" />
+                    {s.isCurrent ? "This device" : "Other device"}
+                  </span>
+                  <span className="text-muted-2">
+                    {new Date(s.lastSeenAt).toLocaleString("en-IN")}
+                  </span>
+                </li>
+              ))
+            )}
+          </ul>
         </section>
 
         <section className="vz-panel p-5">

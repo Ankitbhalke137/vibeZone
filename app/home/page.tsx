@@ -22,14 +22,12 @@ import {
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getDashboardData } from "@/lib/dashboard-data";
-import { getDailyDrop } from "@/lib/daily-drop";
 import { listPosts } from "@/lib/posts";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "@/components/ui/page-header";
 import { Feed } from "@/components/feed/feed";
 import { PollWidget } from "@/components/home/poll-widget";
-import { CampusOrbit } from "@/components/3d/campus-orbit";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -56,9 +54,8 @@ export default async function HomePage() {
   const data = await getDashboardData();
   if (!data) redirect("/login?next=/home");
 
-  const [feed, drop, people] = await Promise.all([
+  const [feed, people] = await Promise.all([
     listPosts({ viewerId: me.id, take: 10, limitComments: 2 }),
-    getDailyDrop(),
     db.user
       .findMany({
         where: { id: { not: me.id }, status: "active" },
@@ -119,16 +116,11 @@ export default async function HomePage() {
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-4">
-        {/* Hero — 3D campus orbit on desktop, glass gradient on mobile */}
-        <section className="relative isolate overflow-hidden rounded-2xl p-5 sm:p-6 vz-stage-3d">
+        {/* Hero — glass gradient */}
+        <section className="relative isolate overflow-hidden rounded-2xl p-5 sm:p-6">
           <div className="absolute inset-0 z-0 rounded-2xl bg-[var(--vz-card-2)] border border-[var(--vz-border)]" />
           <div className="relative z-10">
-            {/* Desktop: 3D orbit */}
-            <div className="hidden lg:block mb-6">
-              <CampusOrbit />
-            </div>
-            {/* Mobile: gradient hero */}
-            <div className="lg:hidden vz-hero relative overflow-hidden rounded-2xl p-4 text-white">
+            <div className="vz-hero relative overflow-hidden rounded-2xl p-4 text-white">
               <div className="vz-hero-glow pointer-events-none absolute inset-0" />
               <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-white/10 blur-3xl" />
               <div className="relative">
@@ -641,31 +633,6 @@ export default async function HomePage() {
               ))}
             </div>
           )}
-          </section>
-        </MotionDiv>
-
-        <MotionDiv
-          whileInView={{ opacity: 1, y: 0 }}
-          initial={{ opacity: 0, y: 12 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
-          <section className="vz-glass-card p-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[11px] font-bold">
-                <Sparkles size={13} className="text-primary" /> Daily drop
-              </div>
-              <span className="text-[9px] text-muted-2">{drop.source}</span>
-            </div>
-            <p className="mt-2 text-[11.5px] font-semibold leading-snug">{drop.setup}</p>
-            {drop.punchline ? (
-              <p className="mt-1 text-[11px] leading-relaxed text-muted">{drop.punchline}</p>
-            ) : null}
-            <Link
-              href="/games"
-              className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
-            >
-              Play the weekly quiz <ArrowRight size={10} />
-            </Link>
           </section>
         </MotionDiv>
 
