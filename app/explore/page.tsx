@@ -40,38 +40,42 @@ export default async function ExplorePage({
   const branchFilter = branch?.trim() ?? "";
   const yearFilter = year?.trim() ?? "";
 
+  const yearNum = yearFilter ? Number(yearFilter) : NaN;
+
   const [feed, people, notes, events, tagRows, distinctBranches, distinctYears] =
     await Promise.all([
       listPosts({ viewerId: me.id, query, take: 10, limitComments: 2 }),
-      db.user.findMany({
-        where: {
-          status: "active",
-          id: { not: me.id },
-          ...(query
-            ? {
-                OR: [
-                  { name: { contains: query, mode: "insensitive" } },
-                  { handle: { contains: query, mode: "insensitive" } },
-                  { branch: { contains: query, mode: "insensitive" } },
-                ],
-              }
-            : {}),
-          ...(branchFilter ? { branch: branchFilter } : {}),
-          ...(yearFilter ? { year: Number(yearFilter) } : {}),
-        },
-        orderBy: { createdAt: "desc" },
-        take: 12,
-        select: {
-          id: true,
-          name: true,
-          handle: true,
-          avatarUrl: true,
-          branch: true,
-          year: true,
-          role: true,
-          lastSeenAt: true,
-        },
-      }),
+      db.user
+        .findMany({
+          where: {
+            status: "active",
+            id: { not: me.id },
+            ...(query
+              ? {
+                  OR: [
+                    { name: { contains: query, mode: "insensitive" } },
+                    { handle: { contains: query, mode: "insensitive" } },
+                    { branch: { contains: query, mode: "insensitive" } },
+                  ],
+                }
+              : {}),
+            ...(branchFilter ? { branch: branchFilter } : {}),
+            ...(Number.isFinite(yearNum) ? { year: yearNum } : {}),
+          },
+          orderBy: { createdAt: "desc" },
+          take: 12,
+          select: {
+            id: true,
+            name: true,
+            handle: true,
+            avatarUrl: true,
+            branch: true,
+            year: true,
+            role: true,
+            lastSeenAt: true,
+          },
+        })
+        .catch(() => []),
       query
         ? db.note.findMany({
             where: {
