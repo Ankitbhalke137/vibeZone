@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { HttpError, requireUser } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { sanitizeBody, stripTags } from "@/lib/sanitize";
 import { audit } from "@/lib/audit";
+import { apiError } from "@/lib/api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,9 +68,6 @@ export async function PATCH(req: Request, { params }: Params) {
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    if (e instanceof HttpError) {
-      return NextResponse.json({ error: e.message }, { status: e.status });
-    }
-    throw e;
+    return apiError(e);
   }
 }

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getCurrentUser, HttpError } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { clearSessionCookie } from "@/lib/session";
+import { apiError } from "@/lib/api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,9 +25,6 @@ export async function POST() {
     await clearSessionCookie();
     return NextResponse.json({ ok: true });
   } catch (e) {
-    if (e instanceof HttpError) {
-      return NextResponse.json({ error: e.message }, { status: e.status });
-    }
-    throw e;
+    return apiError(e);
   }
 }

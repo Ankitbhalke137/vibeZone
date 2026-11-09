@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { getCurrentUser, HttpError, requireUser } from "@/lib/auth";
+import { getCurrentUser, requireUser } from "@/lib/auth";
 import { getSession, slideSession } from "@/lib/session";
 import { isValidAvatarUrl } from "@/lib/avatars";
+import { apiError } from "@/lib/api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,9 +74,6 @@ export async function PATCH(req: Request) {
       user: { id: user.id, handle: user.handle, name: user.name, onboardedAt: user.onboardedAt },
     });
   } catch (e) {
-    if (e instanceof HttpError) {
-      return NextResponse.json({ error: e.message }, { status: e.status });
-    }
-    throw e;
+    return apiError(e);
   }
 }
