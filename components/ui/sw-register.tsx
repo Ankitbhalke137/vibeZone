@@ -17,7 +17,7 @@ export function ServiceWorkerRegister() {
         tone: "error",
       });
     });
-  }, [toast]);
+  }, []);
 
   return null;
 }

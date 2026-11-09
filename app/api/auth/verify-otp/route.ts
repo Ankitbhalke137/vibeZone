@@ -46,7 +46,7 @@ export async function POST(req: Request) {
           action: "suspicious_login",
           targetType: "email",
           reason: "Repeated invalid OTP attempts",
-          metadata: { ip, email, attempts: failCount },
+          metadata: { ip, attempts: failCount },
         });
       }
     }
