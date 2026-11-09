@@ -5,6 +5,7 @@ import { canRequestOtp, issueOtp, OTP_TTL_MIN } from "@/lib/otp";
 import { sendMail } from "@/lib/mailer";
 import { hit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/utils";
+import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ ok: true, devOtp: sent.dev ? code : undefined });
   } catch (err) {
+    // Mail failed — delete the OTP so the user can retry without hitting the resend cap.
+    await db.emailOtp.deleteMany({ where: { email } }).catch(() => {});
     console.error("[request-otp] mail failure:", err);
     return NextResponse.json(
       { error: "Couldn't send the code right now — try again later." },
