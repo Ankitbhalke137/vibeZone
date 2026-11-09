@@ -122,13 +122,13 @@ Grouped by module. Statuses reflect the current branch `feat/professionalization
 - [✅] Broken-link report → moderation queue (FR-NOTES-005)
 - [⚠️] Direct file upload to OCI Object Storage (FR-NOTES-006) — P1 / v1.5
 
-### Polls, Games & Leaderboard
+### Polls & Leaderboard
 - [✅] Daily poll auto-publish 07:00 IST / close 23:00 IST (FR-PLAY-001)
 - [✅] One vote per user per poll; percentages after voting (FR-PLAY-002)
 - [✅] Admin draft/schedule polls (FR-PLAY-003)
 - [✅] Server-side append-only `points_ledger` with daily caps + idempotency (FR-PLAY-004/006)
 - [✅] Weekly (Mon 00:00 IST) + all-time leaderboard, top 10 + your rank (FR-PLAY-005)
-- [⚠️] Weekly 5-question trivia quiz (FR-PLAY-007) — P1 / v1.5
+- [🚫] Weekly trivia quiz (FR-PLAY-007) — removed as scope creep
 
 ### Moderation & Safety
 - [✅] Report queue sorted by age, 24 h SLA (FR-MOD-002)
@@ -162,11 +162,10 @@ Grouped by module. Statuses reflect the current branch `feat/professionalization
 - [✅] Sentry error tracking + structured logs + 5-min uptime check (FR-SYS-004)
 - [⚠️] SEO/OG metadata (FR-SYS-005) — P1
 
-### Additional modules (beyond PRD P0)
-- [✅] Broadcast video streaming — live/upcoming/replay, embedded player, viewer counts
-- [✅] Campus Arcade — weekly quiz, server-side scoring, one attempt/week, points
-- [✅] Academic calendar, Q&A threads with accepted answers, study groups, placement resources
-- [✅] Content automation — cached Daily Drop (joke API + offline fallback) on home feed
+### Additional modules
+The following P2 scope-creep modules were **removed** to keep the student experience focused:
+Broadcast/live streaming, Campus Arcade quiz, Academic Calendar, Campus Q&A,
+Study Groups, Placement Hub, the Daily Drop widget, and the decorative 3D canvases.
 
 ## Architecture
 
@@ -301,7 +300,10 @@ Lost & Found, Seniors Connect, and weekly trivia default to **v1.5** unless Week
 - ⚠️ **Gmail App Password rotation** — the App Password was shared in chat and must be rotated before launch (plan §3 Week 1; RUNBOOK §5).
 - ⚠️ **No UAT yet** — 5–10 student UAT over 3 days on preview deployments is part of M3; not yet completed.
 - ⚠️ **No `v1.0.0` tag** — launch tag not yet created.
-- ⚠️ **Scope creep beyond P0** — Arcade, streaming, academic calendar/Q&A, study groups, placement resources, and Daily Drop are beyond PRD P0; track carefully to protect M3.
+- ⚠️ **Scope creep removed** — Arcade, streaming, academic calendar/Q&A, study groups, placement resources, Daily Drop and 3D canvases were deleted along with their routes, tables and nav entries.
+- ⚠️ **Node 22 required** — Vitest 5 needs Node 22+; `.nvmrc` pins it. On Node 20 `npm test` fails to start.
+- ⚠️ **Route streaming** — list pages still fetch on the client after mount; skeletons cover the first paint, but moving them to RSC is a future improvement.
+- ⚠️ **Duplicate notes API removed** — `/api/v1/notes` was deleted; the app uses `/api/notes`.
 - ⚠️ **Neon autosuspend** — first query after ~5 min idle can take 1–2 s (acceptable; `DIRECT_URL` only for schema ops).
 - ⚠️ **VM reclamation risk** — OCI may reclaim idle instances; weekly keep-alive heartbeat mitigates.
 
@@ -319,10 +321,12 @@ Actual image files don't exist yet — each is marked **[TODO: add screenshot]**
 | Moderation queue / admin dashboard | `./screenshots/moderation.png` | [TODO: add screenshot] |
 | Anonymous feedback portal | `./screenshots/feedback.png` | [TODO: add screenshot] |
 | Lost & Found / Seniors Connect | `./screenshots/social.png` | [TODO: add screenshot] |
-| Broadcast streaming | `./screenshots/streaming.png` | [TODO: add screenshot] |
+| Broadcast streaming (removed) | — | Removed as scope creep |
 | PWA install + mobile view | `./screenshots/pwa.png` | [TODO: add screenshot] |
 
 ## Local development
+
+Requires **Node 22+** (`nvm use` reads `.nvmrc`).
 
 ```bash
 # 1. Install

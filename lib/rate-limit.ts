@@ -18,3 +18,15 @@ export function hit(key: string, limit: number, windowMs: number): boolean {
   if (store.size > 5_000) store.clear(); // safety valve
   return b.count <= limit;
 }
+
+/** Increments the bucket and returns the new count (used for security counters). */
+export function bump(key: string, windowMs: number): number {
+  const now = Date.now();
+  const b = store.get(key);
+  if (!b || b.resetAt <= now) {
+    store.set(key, { count: 1, resetAt: now + windowMs });
+    return 1;
+  }
+  b.count += 1;
+  return b.count;
+}

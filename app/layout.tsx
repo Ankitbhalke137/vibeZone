@@ -1,17 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/app-shell";
 import { ToastProvider } from "@/components/ui/toast";
 import { PageTransition } from "@/components/ui/page-transition";
-import { MeshBackground } from "@/components/3d/mesh-background";
+import { MeshBackground } from "@/components/ui/mesh-background";
 import { InstallPrompt } from "@/components/ui/install-prompt";
 import { ServiceWorkerRegister } from "@/components/ui/sw-register";
 import { gaInitSnippet } from "@/lib/ga";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 // GA4 base (Week 2) — renders nothing when unset (local/preview)
 const GA_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
@@ -51,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-512.png" sizes="512x512" />
         <link rel="mask-icon" href="/icon.svg" color="#7c5cff" />
       </head>
-      <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
+      <body className="font-sans bg-background text-foreground antialiased">
         <ThemeProvider>
           <ToastProvider>
             <MeshBackground />

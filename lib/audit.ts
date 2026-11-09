@@ -28,7 +28,8 @@ export type AuditAction =
   | "club_edit"
   | "club_archive"
   | "club_position_create"
-  | "club_application_review";
+  | "club_application_review"
+  | "suspicious_login";
 
 /** Every privileged action lands in audit_logs (PRD §10, Week 5 compliance gate). */
 export async function audit(entry: {

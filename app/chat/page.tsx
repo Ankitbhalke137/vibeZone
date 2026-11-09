@@ -16,7 +16,6 @@ import { ensureGlobalMembership } from "@/lib/chat";
 import { formatIST, formatISTTime } from "@/lib/time";
 import { PageHeader, SectionHeader } from "@/components/ui/page-header";
 import { ChatDirectory, type ChatListItem } from "@/components/chat/chat-directory";
-import { CampusOrbit } from "@/components/3d/campus-orbit";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Chat" };
@@ -118,11 +117,6 @@ export default async function ChatPage() {
           )
         }
       />
-
-      {/* Hero with 3D campus orbit (desktop) */}
-      <div className="lg:block mb-4">
-        <CampusOrbit />
-      </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
         <div className="flex min-w-0 flex-col gap-3">

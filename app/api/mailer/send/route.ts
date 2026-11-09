@@ -78,7 +78,6 @@ export async function POST(req: Request) {
 
   try {
     await transporter().sendMail({ from: `VibeZone <${env.smtpUser}>`, to, subject, text });
-    console.log(`[mailer] sent to ${to} (${text.length}B)`);
     return NextResponse.json({ ok: true }, { status: 202 });
   } catch (err) {
     console.error("[mailer] send failed:", err);

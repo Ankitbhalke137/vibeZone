@@ -5,7 +5,8 @@ import { env, isCampusEmail } from "@/lib/env";
 import { verifyOtp } from "@/lib/otp";
 import { setSessionCookie } from "@/lib/session";
 import { autoHandle, nameFromEmail, clientIp } from "@/lib/utils";
-import { hit } from "@/lib/rate-limit";
+import { hit, bump } from "@/lib/rate-limit";
+import { audit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,11 +36,18 @@ export async function POST(req: Request) {
 
   const check = await verifyOtp(email, code);
   if (!check.ok) {
-    // Log suspicious login attempt (multiple failures from same IP)
+    // Count consecutive failures per IP; write a security log once it crosses
+    // the threshold. (Previous code used hit() backwards, so this never fired.)
     if (check.status === 401) {
-      const failCount = hit(`otp-fail-${ip}`, 5, 600_000) ? 1 : 6;
-      if (failCount >= 5) {
-        console.error(`[SECURITY] Suspicious login attempts from IP ${ip} for email ${email}`);
+      const failCount = bump(`otp-fail:${ip}`, 600_000);
+      if (failCount === 5 || (failCount > 5 && failCount % 5 === 0)) {
+        await audit({
+          actorId: null,
+          action: "suspicious_login",
+          targetType: "email",
+          reason: "Repeated invalid OTP attempts",
+          metadata: { ip, attempts: failCount },
+        });
       }
     }
     return NextResponse.json({ error: check.error }, { status: check.status });

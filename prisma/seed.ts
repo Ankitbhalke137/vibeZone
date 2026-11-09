@@ -45,10 +45,10 @@ const announcements = [
     body: "<p>Robotics, coding, cultural and sports clubs are taking new members this term. Watch the <b>Events</b> tab for intro sessions.</p>",
   },
   {
-    title: "Exam schedule placeholder",
+    title: "Mid-term exam dates coming soon",
     category: "Urgent",
     pinned: false,
-    body: "<p>Mid-term dates will be pinned here the moment they're official. Keep notifications on.</p>",
+    body: "<p>Mid-term dates will be pinned here the moment they are official. Keep notifications on.</p>",
   },
 ];
 
@@ -82,7 +82,6 @@ async function main() {
   console.log(`✓ ${announcements.length} announcements`);
 
   await seedDemo(system.id);
-  await seedQuiz();
 
   const [users, msgs] = await Promise.all([db.user.count(), db.message.count()]);
   console.log(`— totals: ${users} users, ${msgs} messages`);
@@ -314,158 +313,6 @@ async function seedDemo(systemId: string) {
     }
   }
   console.log(`✓ ${mentorship.length} mentorship requests`);
-
-  // ── Academic calendar ─────────────────────────────────────
-  const calendar = [
-    { title: "Mid-semester examinations begin", category: "exam", days: 4, allDay: true, location: "Exam halls A–D" },
-    { title: "DBMS assignment 2 due", category: "assignment", days: 2, allDay: false, location: null },
-    { title: "Founder's Day (holiday)", category: "holiday", days: 8, allDay: true, location: null },
-    { title: "Hack Night: Build for Campus", category: "event", days: 3, allDay: false, location: "Innovation Lab" },
-    { title: "Placement bootcamp registration closes", category: "deadline", days: 6, allDay: false, location: null },
-    { title: "Operating Systems end-sem", category: "exam", days: 12, allDay: false, location: "Hall B" },
-    { title: "Project demo day", category: "event", days: 16, allDay: false, location: "Auditorium" },
-    { title: "Semester break starts", category: "holiday", days: 21, allDay: true, location: null },
-  ];
-  for (const c of calendar) {
-    const exists = await db.academicCalendar.findFirst({ where: { title: c.title } });
-    if (!exists) {
-      await db.academicCalendar.create({
-        data: {
-          title: c.title,
-          category: c.category,
-          startsAt: at(c.days, 9),
-          endsAt: c.allDay ? at(c.days, 18) : null,
-          location: c.location,
-          isAllDay: c.allDay,
-          createdBy: systemId,
-        },
-      });
-    }
-  }
-  console.log(`✓ ${calendar.length} calendar entries`);
-
-  // ── Study groups ──────────────────────────────────────────
-  const groups = [
-    { title: "CSE Semester 3 — DSA Circle", subject: "Data Structures", branch: "CSE", year: 2, max: 18, by: "isha", desc: "Weekly problem-solving sessions, Sundays 5pm in the library." },
-    { title: "Placement Prep Squad", subject: "Placements", branch: null, year: 4, max: 25, by: "ananya", desc: "Mock interviews, resume reviews, and company-wise question sharing." },
-    { title: "ECE Signals Study Jam", subject: "Signals & Systems", branch: "ECE", year: 2, max: 15, by: "rohan", desc: "Working through past papers together before the mid-sem." },
-    { title: "Design + Code Studio", subject: "Product Design", branch: null, year: null, max: 20, by: "dev", desc: "Build small products together — designers and developers welcome." },
-  ];
-  for (const g of groups) {
-    const exists = await db.studyGroup.findFirst({ where: { title: g.title } });
-    if (!exists) {
-      await db.studyGroup.create({
-        data: {
-          title: g.title,
-          description: g.desc,
-          subject: g.subject,
-          branch: g.branch ?? undefined,
-          year: g.year ?? undefined,
-          maxMembers: g.max,
-          createdBy: users[g.by].id,
-        },
-      });
-    }
-  }
-  console.log(`✓ ${groups.length} study groups`);
-
-  // ── Campus Q&A ────────────────────────────────────────────
-  const questions = [
-    { title: "How do I prepare for DSA interviews in 3 months?", body: "I know basic arrays and strings but feel lost with graphs and DP. What order should I follow, and how many problems per day is realistic alongside classes?", category: "Placements", tags: ["DSA", "Interview"], by: "kabir" },
-    { title: "Best electives for a product management path?", body: "Planning to apply for APM roles next year. Which electives and projects would strengthen my profile the most?", category: "Academics", tags: ["Placements", "Electives"], by: "isha" },
-    { title: "How does the semester exchange program work?", body: "I heard there are partner universities in Europe. What's the eligibility, timeline, and cost? Has anyone here done it?", category: "General", tags: ["Exchange", "Higher studies"], by: "naina" },
-    { title: "Laptop recommendations for ML coursework?", body: "My current laptop struggles with anything beyond small datasets. Is 16GB RAM enough, or should I look at a GPU machine?", category: "Tech", tags: ["ML", "Hardware"], by: "vikram" },
-  ];
-  for (const q of questions) {
-    const exists = await db.question.findFirst({ where: { title: q.title } });
-    if (!exists) {
-      const row = await db.question.create({
-        data: { title: q.title, body: q.body, category: q.category, tags: q.tags, authorId: users[q.by].id },
-      });
-      if (q.title.startsWith("How do I prepare")) {
-        await db.answer.create({
-          data: {
-            questionId: row.id,
-            authorId: users.ananya.id,
-            isAccepted: true,
-            body: "Start with arrays, hashing, and two-pointers for two weeks. Then trees and graphs, then DP. Aim for 3 focused problems a day rather than 10 rushed ones. Use the campus DSA notes folder and bring specific doubts to the study circle on Sundays — happy to walk through them.",
-          },
-        });
-        await db.answer.create({
-          data: {
-            questionId: row.id,
-            authorId: users.dev.id,
-            body: "Also do timed mock interviews early, even if you feel unprepared. The feedback loop matters more than finishing a checklist.",
-          },
-        });
-      }
-      if (q.title.startsWith("Best electives")) {
-        await db.answer.create({
-          data: {
-            questionId: row.id,
-            authorId: users.dev.id,
-            body: "Take a consumer behaviour or analytics elective if it's offered, and pair it with one hands-on product project. APM interviews care a lot about how you frame trade-offs, not just coursework.",
-          },
-        });
-      }
-    }
-  }
-  console.log(`✓ ${questions.length} Q&A threads`);
-
-  // ── Placements ────────────────────────────────────────────
-  const placements = [
-    { title: "Software Engineer Intern — Summer 2027", company: "Google", category: "internship", url: "https://careers.google.com/students/", tags: ["SDE", "DSA", "Internship"], desc: "Applications open for second and third-year students. Expect two coding rounds and one behavioural." },
-    { title: "Product Analyst Graduate Program", company: "Zomato", category: "full-time", url: "https://www.zomato.com/careers", tags: ["Product", "Analytics"], desc: "Campus hire track for final years. SQL and case-study heavy interview loop." },
-    { title: "Resume Review Checklist", company: "VibeZone Placements", category: "resource", url: "https://drive.google.com/drive/folders/1AaSsDdFfGgHhJjKkLlZzXxCc", tags: ["Resume", "Preparation"], desc: "The exact checklist seniors use before submitting applications — one page, action words, metrics." },
-    { title: "Consulting Case Interview Workshop", company: "Deloitte", category: "event", url: "https://www.deloitte.com/careers", tags: ["Consulting", "Workshop"], desc: "Live case walkthrough with recruiters. Third and fourth years, register via the placement cell." },
-    { title: "Backend Developer — Fintech", company: "Razorpay", category: "full-time", url: "https://razorpay.com/jobs/", tags: ["Backend", "Node", "SQL"], desc: "Looking for strong fundamentals in databases and APIs. Referral available through the alumni network." },
-    { title: "Aptitude & GATE Prep Drive", company: "Campus Placement Cell", category: "resource", url: "https://drive.google.com/drive/folders/1QqWwEeRrTtYyUuIiOoPpAaSs", tags: ["GATE", "Aptitude"], desc: "Shared question bank and weekly mock schedule for the upcoming placement season." },
-  ];
-  for (const p of placements) {
-    const exists = await db.placementResource.findFirst({ where: { title: p.title } });
-    if (!exists) {
-      await db.placementResource.create({
-        data: {
-          title: p.title,
-          company: p.company,
-          description: p.desc,
-          category: p.category,
-          url: p.url,
-          tags: p.tags,
-          createdBy: systemId,
-        },
-      });
-    }
-  }
-  console.log(`✓ ${placements.length} placement resources`);
-
-  // ── Broadcasts ────────────────────────────────────────────
-  const broadcasts = [
-    { title: "Hack Night opening keynote", desc: "Live from the Innovation Lab — problem statements, rules, and mentor intros.", status: "live", start: 0, viewer: 148, url: "https://www.youtube.com/watch?v=jfKfPfyJRdk", thumb: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80" },
-    { title: "Placement AMA with recent graduates", desc: "Ask anything about interviews, offers, and the first 90 days at work.", status: "upcoming", start: 2, viewer: 0, url: "https://www.youtube.com/watch?v=21X5lGlDOfg", thumb: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" },
-    { title: "Cultural night — live showcase", desc: "Music, dance, and spoken word from the annual cultural showcase.", status: "upcoming", start: 5, viewer: 0, url: "https://www.youtube.com/watch?v=jfKfPfyJRdk", thumb: "https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=1200&q=80" },
-    { title: "Freshers' orientation replay", desc: "Missed the welcome session? Watch the full recording.", status: "ended", start: -18, viewer: 0, url: "https://www.youtube.com/watch?v=21X5lGlDOfg", thumb: null },
-    { title: "Inter-branch football finals", desc: "Full match replay from the campus ground.", status: "ended", start: -9, viewer: 0, url: "https://www.youtube.com/watch?v=jfKfPfyJRdk", thumb: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80" },
-  ];
-  for (const b of broadcasts) {
-    const exists = await db.broadcast.findFirst({ where: { title: b.title } });
-    if (!exists) {
-      await db.broadcast.create({
-        data: {
-          title: b.title,
-          description: b.desc,
-          streamUrl: b.url,
-          thumbnailUrl: b.thumb ?? undefined,
-          status: b.status,
-          startsAt: at(b.start, b.status === "live" ? new Date().getHours() : 19),
-          endsAt: b.status === "ended" ? at(b.start, 21) : null,
-          viewerCount: b.viewer,
-          hostedBy: users.meera.id,
-        },
-      });
-    }
-  }
-  console.log(`✓ ${broadcasts.length} broadcasts`);
 
   // ── Social feed ───────────────────────────────────────────
   const posts = [
@@ -700,56 +547,4 @@ async function seedDemo(systemId: string) {
     }
   }
   console.log(`✓ ${clubs.length} clubs + positions (eligible years: ${Object.values(clubYearLabel).join(", ")})`);
-}
-
-async function seedQuiz() {
-  const existing = await db.quiz.findFirst({ where: { title: "Campus & Code — Weekly Quiz" } });
-  if (existing) return;
-
-  const monday = new Date();
-  const day = monday.getDay();
-  monday.setDate(monday.getDate() - ((day + 6) % 7));
-  monday.setHours(0, 0, 0, 0);
-
-  await db.quiz.create({
-    data: {
-      title: "Campus & Code — Weekly Quiz",
-      weekOf: monday,
-      opensAt: at(-1, 7),
-      closesAt: at(7, 23),
-      questions: [
-        {
-          q: "Which data structure works on a first-in, first-out (FIFO) basis?",
-          options: ["Stack", "Queue", "Binary tree", "Hash map"],
-          answer: 1,
-          explain: "A queue removes items in the same order they were added.",
-        },
-        {
-          q: "What does an HTTP 404 response mean?",
-          options: ["Server error", "Unauthorized", "Not found", "Redirect"],
-          answer: 2,
-          explain: "404 means the server could not find the requested resource.",
-        },
-        {
-          q: "Which company originally created React?",
-          options: ["Google", "Meta", "Microsoft", "Vercel"],
-          answer: 1,
-          explain: "React was open-sourced by Meta (then Facebook) in 2013.",
-        },
-        {
-          q: "What is the time complexity of binary search on a sorted array?",
-          options: ["O(n)", "O(n log n)", "O(log n)", "O(1)"],
-          answer: 2,
-          explain: "Each comparison halves the search space, giving logarithmic time.",
-        },
-        {
-          q: "Which block hosts the campus Innovation Lab?",
-          options: ["Block A", "Block B", "Block C", "Block D"],
-          answer: 2,
-          explain: "Hack nights and the maker space live in Block C.",
-        },
-      ],
-    },
-  });
-  console.log("✓ weekly quiz");
 }

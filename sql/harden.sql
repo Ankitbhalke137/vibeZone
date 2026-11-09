@@ -94,11 +94,6 @@ CREATE INDEX IF NOT EXISTS idx_ann_feed ON announcements (pinned DESC, publish_a
 CREATE INDEX IF NOT EXISTS idx_points_bucket ON point_ledger (bucket_date, user_id);
 
 DO $$ BEGIN
-  ALTER TABLE broadcasts ADD CONSTRAINT broadcasts_status_chk
-    CHECK (status IN ('live','upcoming','ended'));
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
   ALTER TABLE clubs ADD CONSTRAINT clubs_category_chk
     CHECK (category IN ('tech','robotics','sports','business','cultural','content','social-welfare'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
